@@ -1,0 +1,8 @@
+* text=auto
+*.svg -text
+sources/* -text
+*.xlsx binary
+*.zip binary
+*.wav binary
+*.ogg binary
+*.mp3 binary
