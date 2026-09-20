@@ -84,6 +84,20 @@ POSITION_BINDINGS = [
 ]
 
 
+def marker_center(element):
+    tag = element.tag.split('}')[-1]
+    if tag == 'circle':
+        return float(element.attrib['cx']), float(element.attrib['cy'])
+    if tag == 'path':
+        # Supplied point paths are circular cubic paths: M starts at the top
+        # center and the first C segment ends at the right center.
+        values = [float(n) for n in re.findall(r'-?(?:\d+(?:\.\d*)?|\.\d+)', element.attrib.get('d', ''))]
+        if not element.attrib.get('d', '').startswith('M') or len(values) < 8:
+            raise ValueError('Unexpected marker path geometry')
+        return values[0], values[7]
+    raise ValueError(f'Unexpected marker element: {tag}')
+
+
 def build_data(source_dir):
     workbook = read_workbook(source_dir / 'data.xlsx')
     required = {'Place', 'Activity', 'Sound', 'ategory Weight'}
@@ -121,11 +135,19 @@ def build_data(source_dir):
     if svg.attrib.get('viewBox') != '0 0 1440 1024':
         raise ValueError('Position viewBox changed; revalidate marker bindings')
     roads = [dict(svg[i].attrib) for i in range(1,9)]
+    with zipfile.ZipFile(source_dir / 'original-design.zip') as archive:
+        reference = ET.fromstring(archive.read('Active Main map page.svg'))
+    reference_roads = [reference[i].attrib.get('d') for i in range(1,9)]
+    if [road.get('d') for road in roads] != reference_roads:
+        raise ValueError('Road geometry differs from the preserved active-map reference')
     markers = []
     for index, number, x, y in POSITION_BINDINGS:
         e = svg[index]
         if e.tag.split('}')[-1] not in ('circle','path'):
             raise ValueError(f'Position source changed at element {index}')
+        actual_x, actual_y = marker_center(e)
+        if abs(actual_x - x) > .01 or abs(actual_y - y) > .01:
+            raise ValueError(f'Position center changed at element {index}: {(actual_x, actual_y)}')
         geometry = {k:v for k,v in e.attrib.items() if k in ('d','cx','cy','r')}
         markers.append({'id': f'm{index}', 'placeId': f'P{number:02}', 'x': x, 'y': y,
                         'shape': e.tag.split('}')[-1], 'geometry': geometry,

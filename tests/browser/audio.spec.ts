@@ -1,6 +1,8 @@
 import { expect, test, type Page } from '@playwright/test'
 
-test.skip(({browserName}) => browserName === 'webkit', 'Playwright WebKit on Windows does not expose Web Audio; UI coverage runs in desktop.spec.ts')
+async function requireWebAudio(page: Page) {
+  test.skip(!await page.evaluate(() => typeof AudioContext !== 'undefined'), 'This browser build does not expose Web Audio')
+}
 
 async function instrumentAudio(page: Page) {
   await page.addInitScript(() => {
@@ -42,6 +44,7 @@ async function energy(page: Page) {
 test('audio starts on gesture, produces actual samples, fades, mutes, pauses and stays unique', async ({ page }) => {
   await instrumentAudio(page)
   await page.goto('/#experience')
+  await requireWebAudio(page)
   expect(await page.evaluate(() => (window as unknown as {audioProbe:{contexts:AudioContext[]}}).audioProbe.contexts.length)).toBe(0)
   await page.getByRole('button', { name: 'Play soundscape', exact: true }).click()
   await expect(page.getByRole('button', { name: 'Pause soundscape', exact: true })).toBeVisible()
@@ -65,6 +68,7 @@ test('audio starts on gesture, produces actual samples, fades, mutes, pauses and
 test('failed files report error and can be retried', async ({page}) => {
   await page.route('**/audio/metal.mp3', route => route.abort())
   await page.goto('/#experience')
+  await requireWebAudio(page)
   await page.getByRole('button', {name:'Play soundscape',exact:true}).click()
   await expect(page.getByRole('alert')).toContainText('load')
   await expect(page.getByRole('button', {name:'Play soundscape',exact:true})).toBeVisible()
@@ -79,6 +83,7 @@ test('cancel during loading never starts playback later', async ({page}) => {
   const gate = new Promise<void>(resolve => { release = resolve })
   await page.route('**/audio/*.mp3', async route => { await gate; await route.continue() })
   await page.goto('/#experience')
+  await requireWebAudio(page)
   await page.getByRole('button', {name:'Play soundscape',exact:true}).click()
   await page.getByRole('button', {name:'Cancel loading soundscape',exact:true}).click()
   release()

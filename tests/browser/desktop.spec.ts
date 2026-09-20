@@ -14,4 +14,10 @@ test('uses the supplied hero and method and keeps map geometry proportional', as
     expect(map!.x + map!.width).toBeLessThan(controls!.x)
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
   }
+  for (let width = 1024; width <= 1920; width += 32) {
+    await page.setViewportSize({width, height: 800})
+    const map = await page.locator('.activity-map').boundingBox()
+    expect(map!.width / map!.height).toBeCloseTo(1100 / 1024, 2)
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
+  }
 })

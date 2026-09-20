@@ -12,7 +12,7 @@ export function PlaceDetail({ marker, day, active, onClose }: { marker: Marker; 
     style={{ left: `${Math.min(marker.x / 1100 * 100 + 2, 63)}%`, top: `${Math.min(marker.y / 1024 * 100, 70)}%` }}
     onKeyDown={e => { if (e.key === 'Escape') onClose() }}>
     <button className="close-detail" ref={close} onClick={onClose} aria-label="Close place details">×</button>
-    <h2 lang="th">{place.name}</h2>
+    <h2 lang={/[ก-๙]/.test(place.name) ? 'th' : undefined}>{place.name}</h2>
     <p className="detail-category">{place.category}</p>
     <p>{fullDays[day]} · {hours ? `${formatTime(hours[0])}–${formatTime(hours[1])}` : 'Closed'}</p>
     <p>Activity · {place.category}</p>

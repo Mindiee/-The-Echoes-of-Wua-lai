@@ -6,6 +6,7 @@ export default defineConfig({
   use: { baseURL: 'http://127.0.0.1:5173', trace: 'retain-on-failure' },
   projects: [
     { name: 'chromium', use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 1024 } } },
+    { name: 'chromium-dpr2', testMatch: /desktop\.spec\.ts/, use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 1024 }, deviceScaleFactor: 2 } },
     { name: 'firefox', use: { ...devices['Desktop Firefox'], viewport: { width: 1440, height: 1024 } } },
     { name: 'webkit', use: { ...devices['Desktop Safari'], viewport: { width: 1440, height: 1024 } } },
   ],
