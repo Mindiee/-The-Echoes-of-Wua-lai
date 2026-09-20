@@ -5,6 +5,7 @@ import { PlaceDetail } from './components/PlaceDetail'
 import { bangkokTime, calculateActivity } from './activity'
 import type { Marker } from './data/types'
 import { data } from './data'
+import { useSoundscape } from './audio/useSoundscape'
 
 export default function App() {
   const [day, setDay] = useState(0)
@@ -15,6 +16,7 @@ export default function App() {
   const [roads, setRoads] = useState(true)
   const [selected, setSelected] = useState<Marker>()
   const activity = useMemo(() => calculateActivity(data, day, minute), [day, minute])
+  const audio = useSoundscape(activity, muted)
   useEffect(() => {
     if (!realtime) return
     const update = () => { const t = bangkokTime(); setDay(t.day); setMinute(t.minute) }
@@ -41,9 +43,9 @@ export default function App() {
           {selected && <PlaceDetail marker={selected} day={day} active={activity.activeIds.includes(selected.placeId)} onClose={closeDetail} />}
         </div>
         <Controls day={day} minute={minute} count={activity.density} realtime={realtime} muted={muted} dark={dark} roads={roads}
-          playing={false} loading={false} error="" onDay={d => { setRealtime(false); setDay(d) }}
+          playing={audio.playing} loading={audio.loading} error={audio.error} onDay={d => { setRealtime(false); setDay(d) }}
           onMinute={m => { setRealtime(false); setMinute(m) }} onRealtime={() => setRealtime(r => !r)}
-          onMute={() => setMuted(m => !m)} onTheme={() => setDark(d => !d)} onRoads={() => setRoads(r => !r)} onPlay={() => {}} />
+          onMute={() => setMuted(m => !m)} onTheme={() => setDark(d => !d)} onRoads={() => setRoads(r => !r)} onPlay={audio.toggle} />
       </div>
     </section>
     <section className="method reference-section" aria-label="How it works">
