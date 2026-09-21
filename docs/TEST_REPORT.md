@@ -8,7 +8,7 @@ Run date: 2026-09-22 (Asia/Bangkok). Host: Windows desktop environment.
 - Vitest: 13 tests covering 10,087 weekly minute samples, open/close boundaries, `Close`, decimal times, 24:00, duplicate markers, approved density/intensity fixtures, audio voice/weight rules and activity soloing.
 - Desktop geometry: 1024×768, 1280×720, 1366×768, 1440×900, 1440×1024, 1920×1080 and 2560×1440; map aspect, control separation and horizontal overflow checked after each live resize.
 - DPR: Chromium desktop geometry repeated at device scale factors 1 and 2.
-- Interaction: sequenced left-to-right Hero reveal, live silent Hero, user-gesture entry, day, minute, real time exit, P14 route, repeated P20 markers, persistent marker selection and details, continuous active glow, adaptive hover tooltip, marker fading, Method reveal, icon controls, night theme and road visibility.
+- Interaction: Hero title travels across more than 42% of the stage while the map opens behind it and the description waits for both to finish; live silent Hero, user-gesture entry, day, minute, real time exit, P14 route, repeated P20 markers, persistent marker selection and details, continuous active glow, adaptive hover tooltip, marker fading, Method reveal, icon controls, night theme and road visibility.
 - Audio on Chromium: Hero remains silent before user entry; user-gesture start, decoded local musical samples with measurable output, hover preview, persistent selection solo, smooth activity crossfades, silence at 24:00, pause/resume, one AudioContext, failed fetch/retry and cancellation during load. Crowd audio is not requested.
 
 ## Browser results

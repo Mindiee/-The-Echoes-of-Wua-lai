@@ -49,9 +49,32 @@ test('interactive hero, unified icon controls, persistent marker selection and m
       const style = getComputedStyle(element)
       return { name: style.animationName, delay: parseFloat(style.animationDelay), duration: parseFloat(style.animationDuration) }
     })))
-  expect(sequence.map(stage => stage.name)).toEqual(['heroTitleReveal','heroMapReveal','heroDescriptionReveal'])
+  expect(sequence.map(stage => stage.name)).toEqual(['heroTitleTravel','heroMapOpen','heroDescriptionReveal'])
   expect(sequence[0].delay).toBeLessThan(sequence[1].delay)
+  expect(sequence[0].delay + sequence[0].duration).toBeCloseTo(sequence[1].delay + sequence[1].duration, 1)
   expect(sequence[1].delay + sequence[1].duration).toBeLessThanOrEqual(sequence[2].delay)
+  await page.locator('.hero-enter').evaluate(root => {
+    for (const selector of ['.hero-copy h1','.hero-map','.hero-description']) {
+      const animation = root.querySelector(selector)?.getAnimations()[0]
+      animation?.pause()
+      if (animation) animation.currentTime = 0
+    }
+  })
+  const heroBox = await page.locator('.hero-enter').boundingBox()
+  const titleStart = await page.locator('.hero-copy h1').boundingBox()
+  expect(titleStart!.x).toBeLessThan(heroBox!.x + heroBox!.width * .22)
+  await page.locator('.hero-enter').evaluate(root => {
+    for (const selector of ['.hero-copy h1','.hero-map','.hero-description']) {
+      const animation = root.querySelector(selector)?.getAnimations()[0]
+      if (animation) animation.currentTime = 2600
+    }
+  })
+  const titleEnd = await page.locator('.hero-copy h1').boundingBox()
+  expect(titleEnd!.x).toBeGreaterThan(heroBox!.x + heroBox!.width * .52)
+  expect(titleEnd!.x - titleStart!.x).toBeGreaterThan(heroBox!.width * .42)
+  await page.locator('.hero-enter').evaluate(root => {
+    for (const selector of ['.hero-copy h1','.hero-map','.hero-description']) root.querySelector(selector)?.getAnimations()[0]?.play()
+  })
   await expect(page.locator('.hero .map-marker')).toHaveCount(60)
   await expect(page.locator('.hero [data-category="Crafthouse"] rect')).toHaveCount(0)
   await page.getByRole('button', {name:'Enter the active map'}).click()
