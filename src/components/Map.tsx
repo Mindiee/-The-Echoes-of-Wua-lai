@@ -4,11 +4,11 @@ import type { CSSProperties } from 'react'
 
 type Props = {
   activeIds: string[]; showRoads: boolean; selectedId?: string; onSelect?: (marker: Marker) => void
-  interactive?: boolean; hoveredId?: string; onHover?: (placeId?: string) => void
-  playing?: boolean; rhythms?: Record<string, number>
+  interactive?: boolean; hoveredId?: string; onHover?: (marker?: Marker) => void
+  rhythms?: Record<string, number>
 }
 
-export function Map({ activeIds, showRoads, selectedId, onSelect, interactive = true, hoveredId, onHover, playing = false, rhythms = {} }: Props) {
+export function Map({ activeIds, showRoads, selectedId, onSelect, interactive = true, hoveredId, onHover, rhythms = {} }: Props) {
   const active = new Set(activeIds)
   const highlightedId = hoveredId ?? selectedId
   return <svg className={`activity-map ${highlightedId ? 'has-focus' : ''}`} viewBox="0 0 1100 1024"
@@ -26,25 +26,26 @@ export function Map({ activeIds, showRoads, selectedId, onSelect, interactive = 
       const isHovered = hoveredId === place.id
       const isSelected = selectedId === place.id
       const isHighlighted = highlightedId === place.id
-      const audible = playing && isActive && (!highlightedId || isHighlighted)
-      const style = { '--rhythm': `${rhythms[place.id] ?? 3.2}s`, '--phase': `${.05 + (Number(place.id.slice(1)) % 7) * .1}s` } as CSSProperties
+      const style = {
+        '--rhythm': `${rhythms[place.id] ?? 3.2}s`,
+        '--phase': `${.05 + (Number(place.id.slice(1)) % 7) * .1}s`,
+        '--activity-color': isActive ? colors[place.category] : 'transparent',
+      } as CSSProperties
       return <g key={marker.id} data-marker={marker.id} data-place={place.id} data-active={isActive}
         data-category={place.category} data-hovered={isHovered} data-selected={isSelected}
-        data-highlighted={isHighlighted} data-dimmed={Boolean(highlightedId && !isHighlighted)} data-audible={audible}
+        data-highlighted={isHighlighted} data-dimmed={Boolean(highlightedId && !isHighlighted)}
         className={`map-marker ${isRoute ? 'route-marker' : ''}`} role={interactive ? 'button' : undefined} tabIndex={interactive ? 0 : undefined}
         aria-label={label} aria-pressed={selectedId === place.id}
-        style={style} onPointerEnter={interactive ? () => onHover?.(place.id) : undefined} onPointerLeave={interactive ? () => onHover?.() : undefined}
-        onFocus={interactive ? () => onHover?.(place.id) : undefined} onBlur={interactive ? () => onHover?.() : undefined}
+        style={style} onPointerEnter={interactive ? () => onHover?.(marker) : undefined} onPointerLeave={interactive ? () => onHover?.() : undefined}
+        onFocus={interactive ? () => onHover?.(marker) : undefined} onBlur={interactive ? () => onHover?.() : undefined}
         onClick={interactive ? () => onSelect?.(marker) : undefined} onKeyDown={interactive ? event => {
           if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); onSelect?.(marker) }
         } : undefined}>
         <title>{label}</title>
         {isRoute ? <>
-          <path className="marker-ripple route-ripple" d={marker.geometry.d} fill="none" stroke={color} strokeWidth="5" strokeLinecap="round" />
           <path className="marker-visible" d={marker.geometry.d} fill="none" stroke={isActive ? color : 'var(--road)'} strokeWidth="2" strokeLinecap="round" />
           <path d={marker.geometry.d} fill="none" stroke="transparent" strokeWidth="16" className="hit-target" />
         </> : <>
-          <circle className="marker-ripple" cx={marker.x} cy={marker.y} r={isCrafthouse ? 5 : 7} fill="none" stroke={color} strokeWidth="2" />
           {marker.frame && !isCrafthouse && <rect x={marker.x - 4} y={marker.y - 4} width="8" height="8" fill="none" stroke="var(--ink)" strokeWidth=".7" />}
           {isCrafthouse
             ? <circle className="marker-visible" cx={marker.x} cy={marker.y} r="4" fill={isActive ? color : 'var(--paper)'} stroke={color} strokeWidth="1" />

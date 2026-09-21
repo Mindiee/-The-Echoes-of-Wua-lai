@@ -14,7 +14,7 @@ export function Hero({activity, day, minute, dark, onEnter}: {
       <div className="hero-copy">
         <p className="hero-kicker">INTERACTIVE SOUND MAP · WUA-LAI</p>
         <h1>The Echoes of Wua-lai</h1>
-        <p className="hero-description">An interactive experience transforming Wua-lai’s silver craft activity data into music, revealing the neighborhood’s rhythm through sound.</p>
+        <p className="hero-description">A sound map revealing the rhythm of Wua-lai, Chiang Mai, through its everyday activities.</p>
         <p className="hero-live"><span /> LIVE · {fullDays[day].toUpperCase()} {formatTime(minute)} · {activity.density} ACTIVE</p>
         <span className="hero-cta">ENTER ACTIVE MAP <b aria-hidden="true">↓</b></span>
       </div>

@@ -15,7 +15,7 @@ npm run dev
 
 Open `http://127.0.0.1:5173`. The live Hero remains silent; audio starts only after entering the Active Map or pressing Play. All runtime audio is stored in the repository, so playback makes no remote requests.
 
-Selecting a marker keeps its place highlighted, fades the other markers, opens its current-day details and isolates its continuous activity voice. Selecting another marker crossfades to the new voice; hovering previews an activity without changing the underlying map or schedule data.
+Selecting a marker keeps its place highlighted, fades the other markers, opens its current-day details and isolates its continuous activity voice. Selecting another marker crossfades to the new voice. Hovering previews an activity and shows an automatically positioned tooltip. Every active marker keeps a subtle category-colored glow pulse for its entire active period, independently of audio playback.
 
 ## Source data
 

@@ -8,6 +8,7 @@ import { data } from './data'
 import { useSoundscape } from './audio/useSoundscape'
 import { buildVoices } from './audio/score'
 import { Hero } from './components/Hero'
+import { MarkerTooltip } from './components/MarkerTooltip'
 
 export default function App() {
   const [day, setDay] = useState(0)
@@ -17,7 +18,7 @@ export default function App() {
   const [dark, setDark] = useState(false)
   const [roads, setRoads] = useState(true)
   const [selected, setSelected] = useState<Marker>()
-  const [hoveredId, setHoveredId] = useState<string>()
+  const [hovered, setHovered] = useState<Marker>()
   const [heroClock, setHeroClock] = useState(() => bangkokTime())
   const [methodRevealed, setMethodRevealed] = useState(false)
   const methodRef = useRef<HTMLElement>(null)
@@ -44,13 +45,13 @@ export default function App() {
     observer.observe(node)
     return () => observer.disconnect()
   }, [])
-  const hoverActivity = (placeId?: string) => {
-    setHoveredId(placeId)
-    audio.solo(placeId ?? selected?.placeId, .4)
+  const hoverActivity = (marker?: Marker) => {
+    setHovered(marker)
+    audio.solo(marker?.placeId ?? selected?.placeId, .4)
   }
   const selectActivity = (marker: Marker) => {
     setSelected(marker)
-    setHoveredId(undefined)
+    setHovered(undefined)
     audio.solo(marker.placeId, .8)
     audio.start()
   }
@@ -66,7 +67,7 @@ export default function App() {
   const closeDetail = () => {
     const marker = selected
     setSelected(undefined)
-    audio.solo(hoveredId, .8)
+    audio.solo(hovered?.placeId, .8)
     if (marker) document.querySelector<SVGGElement>(`[data-marker="${marker.id}"]`)?.focus({ preventScroll: true })
   }
   return <main data-theme={dark ? 'night' : 'day'}>
@@ -76,7 +77,8 @@ export default function App() {
       <div className="experience-layout">
         <div className="map-region">
           <Map activeIds={activity.activeIds} showRoads={roads} selectedId={selected?.placeId} onSelect={selectActivity}
-            hoveredId={hoveredId} onHover={hoverActivity} playing={audio.playing && !muted} rhythms={rhythms} />
+            hoveredId={hovered?.placeId} onHover={hoverActivity} rhythms={rhythms} />
+          {hovered && <MarkerTooltip marker={hovered} day={day} active={activity.activeIds.includes(hovered.placeId)} />}
           {selected && <PlaceDetail marker={selected} day={day} active={activity.activeIds.includes(selected.placeId)} onClose={closeDetail} />}
         </div>
         <Controls day={day} minute={minute} count={activity.density} realtime={realtime} muted={muted} dark={dark} roads={roads}
@@ -86,7 +88,7 @@ export default function App() {
       </div>
     </section>
     <section ref={methodRef} className="method reference-section" aria-label="How it works" data-revealed={methodRevealed}>
-      <img className={`reference-image ${dark ? 'dark-reference' : ''}`} src={`${import.meta.env.BASE_URL}references/Method.svg`} alt="Activity Data to Sound: Day and Time, Active Activities, Activity Density, Category Weight, Sound Intensity, Generative Sound." />
+      <img className={`reference-image ${dark ? 'dark-reference' : ''}`} src={`${import.meta.env.BASE_URL}references/Method.svg`} alt="How Wua-lai activity data becomes sound and how to explore the interactive experience." />
     </section>
   </main>
 }

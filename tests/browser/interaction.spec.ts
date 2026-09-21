@@ -39,9 +39,19 @@ test('day/time state, duplicate markers, details and appearance controls', async
 })
 
 test('interactive hero, unified icon controls, persistent marker selection and method reveal', async ({page}) => {
+  await page.emulateMedia({reducedMotion:'reduce'})
   await page.goto('/')
   await expect(page.locator('.hero .activity-map')).toBeVisible()
   await expect(page.locator('.hero-copy h1')).toContainText('The Echoes of Wua-lai')
+  await expect(page.locator('.hero-description')).toHaveText('A sound map revealing the rhythm of Wua-lai, Chiang Mai, through its everyday activities.')
+  const sequence = await Promise.all(['.hero-copy h1','.hero-map','.hero-description'].map(selector =>
+    page.locator(selector).evaluate(element => {
+      const style = getComputedStyle(element)
+      return { name: style.animationName, delay: parseFloat(style.animationDelay), duration: parseFloat(style.animationDuration) }
+    })))
+  expect(sequence.map(stage => stage.name)).toEqual(['heroTitleReveal','heroMapReveal','heroDescriptionReveal'])
+  expect(sequence[0].delay).toBeLessThan(sequence[1].delay)
+  expect(sequence[1].delay + sequence[1].duration).toBeLessThanOrEqual(sequence[2].delay)
   await expect(page.locator('.hero .map-marker')).toHaveCount(60)
   await expect(page.locator('.hero [data-category="Crafthouse"] rect')).toHaveCount(0)
   await page.getByRole('button', {name:'Enter the active map'}).click()
@@ -60,4 +70,34 @@ test('interactive hero, unified icon controls, persistent marker selection and m
   await page.getByRole('button', {name:'View how it works'}).click()
   await expect(page.locator('.method')).toHaveAttribute('data-revealed', 'true')
   await expect(page.locator('.method')).toBeInViewport()
+})
+
+test('active markers glow continuously and hover tooltip avoids its marker', async ({page}) => {
+  await page.emulateMedia({reducedMotion:'reduce'})
+  await page.goto('/#experience')
+  const activeMarker = page.locator('#experience [data-place=P20]').first()
+  await expect(activeMarker).toHaveAttribute('data-active', 'true')
+  const visibleShape = activeMarker.locator('.marker-visible')
+  await expect(visibleShape).toHaveCSS('animation-name', 'activeMarkerGlow')
+  await expect(page.locator('#experience .marker-ripple')).toHaveCount(0)
+  await expect(page.getByRole('button', {name:'Play soundscape',exact:true})).toBeVisible()
+  await expect(visibleShape).toHaveCSS('animation-name', 'activeMarkerGlow')
+
+  const edgeMarker = page.locator('#experience [data-marker=m123]')
+  await edgeMarker.hover()
+  const tooltip = page.getByRole('tooltip')
+  await expect(tooltip).toBeVisible()
+  await expect(tooltip).toContainText('Silver Shop')
+  await expect(tooltip).toContainText(/Active|Inactive/)
+  await expect(tooltip).toHaveAttribute('data-horizontal', 'left')
+  await expect(tooltip).toHaveAttribute('data-vertical', 'below')
+  const markerBox = await edgeMarker.boundingBox()
+  const tooltipBox = await tooltip.boundingBox()
+  const overlaps = markerBox!.x < tooltipBox!.x + tooltipBox!.width && markerBox!.x + markerBox!.width > tooltipBox!.x &&
+    markerBox!.y < tooltipBox!.y + tooltipBox!.height && markerBox!.y + markerBox!.height > tooltipBox!.y
+  expect(overlaps).toBe(false)
+
+  await setSlider(page, 'Time', 1440)
+  await expect(activeMarker).toHaveAttribute('data-active', 'false')
+  await expect(visibleShape).toHaveCSS('animation-name', 'none')
 })
