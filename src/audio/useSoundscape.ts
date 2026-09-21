@@ -12,11 +12,13 @@ export function useSoundscape(activity: ActivityState, muted: boolean) {
   }, [])
   useEffect(() => { engine.current?.update(activity) }, [activity])
   useEffect(() => { engine.current?.setMuted(muted) }, [muted])
+  const start = () => { void engine.current?.play() }
+  const solo = (placeId?: string, fade?: number) => { engine.current?.setSolo(placeId, fade) }
   const toggle = () => {
     const current = engine.current
     if (!current) return
     if (current.state.status === 'playing' || current.state.status === 'loading') current.pause()
     else void current.play()
   }
-  return { playing: state.status === 'playing', loading: state.status === 'loading', error: state.error, toggle }
+  return { playing: state.status === 'playing', loading: state.status === 'loading', error: state.error, toggle, start, solo }
 }

@@ -5,14 +5,24 @@ type Props = {
   day: number; minute: number; count: number; realtime: boolean
   muted: boolean; dark: boolean; roads: boolean; playing: boolean; loading: boolean; error: string
   onDay: (day: number) => void; onMinute: (minute: number) => void; onRealtime: () => void
-  onMute: () => void; onTheme: () => void; onRoads: () => void; onPlay: () => void
+  onMethod: () => void; onTheme: () => void; onRoads: () => void; onPlay: () => void
 }
 
 const legend = [['Temple','#EAAB1D'],['Workshop','#E94A35'],['Museum','#BC522A'],['Market','#007A9B'],['Crafthouse','#B8B19E']]
 
+function Icon({name}: {name: 'method' | 'theme' | 'road' | 'play' | 'pause'}) {
+  return <svg className="control-icon" viewBox="0 0 20 20" aria-hidden="true">
+    {name === 'method' && <><path d="M4 5h8M4 10h12M4 15h8"/><path d="m12 13 3 2-3 2"/></>}
+    {name === 'theme' && <path d="M14.5 13.8A6 6 0 0 1 6.2 5.5 6.2 6.2 0 1 0 14.5 13.8Z"/>}
+    {name === 'road' && <><path d="M6.5 3 5 17M13.5 3 15 17"/><path d="M10 4v2m0 2v2m0 2v2m0 2v1"/></>}
+    {name === 'play' && <path className="fill-icon" d="m7 5 8 5-8 5Z"/>}
+    {name === 'pause' && <><path d="M7 5v10M13 5v10"/></>}
+  </svg>
+}
+
 export function Controls(p: Props) {
   return <aside className="controls" aria-label="Soundscape controls">
-    <h1>The Echoes of Wua-lai</h1>
+    <h2>The Echoes of Wua-lai</h2>
     <p className="active-count" aria-live="polite"><span className={`status-dot ${p.playing && !p.muted ? 'playing' : ''}`} />
       <span data-testid="active-count">{p.count} ACTIVE ACTIVITIES</span></p>
     <ul className="legend" aria-label="Activity legend">
@@ -28,10 +38,10 @@ export function Controls(p: Props) {
       <div className="ticks day-ticks" aria-hidden="true">{[6,0,1,2,3,4,5].map(d => <span key={d}>{days[d]}</span>)}</div>
     </div>
     <div className="actions">
-      <button className="circle-control" aria-label={p.muted ? 'Unmute sound' : 'Mute sound'} aria-pressed={p.muted} onClick={p.onMute} title={p.muted ? 'Unmute sound' : 'Mute sound'}><span className="sr-only">Sound</span></button>
-      <button className="circle-control" aria-label="Night mode" aria-pressed={p.dark} onClick={p.onTheme} title="Day / night mode" />
-      <button className="circle-control road-control" aria-label="Show roads" aria-pressed={p.roads} onClick={p.onRoads} title="Show / hide roads" />
-      <button className={`circle-control play-control ${p.loading ? 'loading' : ''}`} aria-label={p.loading ? 'Cancel loading soundscape' : p.playing ? 'Pause soundscape' : 'Play soundscape'} aria-pressed={p.playing} onClick={p.onPlay} title={p.playing ? 'Pause' : 'Play'} />
+      <button className="circle-control" aria-label="View how it works" aria-pressed="false" onClick={p.onMethod} title="How it works"><Icon name="method" /></button>
+      <button className="circle-control" aria-label="Night mode" aria-pressed={p.dark} onClick={p.onTheme} title="Day / night mode"><Icon name="theme" /></button>
+      <button className="circle-control" aria-label="Show roads" aria-pressed={p.roads} onClick={p.onRoads} title="Show / hide roads"><Icon name="road" /></button>
+      <button className={`circle-control ${p.loading ? 'loading' : ''}`} aria-label={p.loading ? 'Cancel loading soundscape' : p.playing ? 'Pause soundscape' : 'Play soundscape'} aria-pressed={p.playing} onClick={p.onPlay} title={p.playing ? 'Pause' : 'Play'}><Icon name={p.playing ? 'pause' : 'play'} /></button>
     </div>
     <p className="playback-state" role="status">{p.loading ? 'Loading sound…' : p.playing ? p.muted ? 'Playing · muted' : p.count ? 'Soundscape playing' : 'Playing · no active activities' : ''}</p>
     {p.error && <p className="audio-error" role="alert">{p.error} <button onClick={p.onPlay}>Try again</button></p>}

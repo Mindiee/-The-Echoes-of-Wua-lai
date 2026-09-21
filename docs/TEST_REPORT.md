@@ -1,21 +1,21 @@
 # Desktop verification report
 
-Run date: 2026-09-20 (Asia/Bangkok). Host: Windows desktop environment.
+Run date: 2026-09-22 (Asia/Bangkok). Host: Windows desktop environment.
 
 ## Automated coverage
 
 - Python import audit: 6 tests covering workbook/SVG extraction, every pinned marker center, ordered preserved road geometry, road substitution and source constraints.
-- Vitest: 12 tests covering 10,087 weekly minute samples, open/close boundaries, `Close`, decimal times, 24:00, duplicate markers, approved density/intensity fixtures and audio voice/weight rules.
+- Vitest: 13 tests covering 10,087 weekly minute samples, open/close boundaries, `Close`, decimal times, 24:00, duplicate markers, approved density/intensity fixtures, audio voice/weight rules and activity soloing.
 - Desktop geometry: 1024×768, 1280×720, 1366×768, 1440×900, 1440×1024, 1920×1080 and 2560×1440; map aspect, control separation and horizontal overflow checked after each live resize.
 - DPR: Chromium desktop geometry repeated at device scale factors 1 and 2.
-- Interaction: day, minute, real time exit, P14 route, repeated P20 markers, detail keyboard behavior, night theme and road visibility.
-- Audio on Chromium: user-gesture start, decoded local samples with measurable output, mute/unmute, 0.8-second activity fades, silence at 24:00, pause/resume, one AudioContext, failed fetch/retry and cancellation during load.
+- Interaction: live silent Hero, user-gesture entry, day, minute, real time exit, P14 route, repeated P20 markers, persistent marker selection and details, marker fading, hover focus, Method reveal, icon controls, night theme and road visibility.
+- Audio on Chromium: Hero remains silent before user entry; user-gesture start, decoded local musical samples with measurable output, hover preview, persistent selection solo, smooth activity crossfades, silence at 24:00, pause/resume, one AudioContext, failed fetch/retry and cancellation during load. Crowd audio is not requested.
 
 ## Browser results
 
 | Browser target | Result on this host | Scope |
 |---|---|---|
-| Playwright Chromium | Pass | UI, responsive matrix, interactions and full Web Audio tests |
+| Playwright Chromium | Pass | 7 applicable Chromium/DPR checks passed in a sequential verification run; UI, responsive matrix, interactions and full Web Audio tests |
 | Playwright WebKit | Pass for UI and interactions | This Windows Playwright build does not expose `AudioContext`; the application reports the unsupported state and its capability test passes |
 | Playwright Firefox | Could not launch on this host | The installed Playwright Firefox binary exits before page creation with Windows `spawn UNKNOWN`, both inside and outside the sandbox; no application assertion ran |
 | macOS Safari | Not run | No macOS host was available; Playwright WebKit is simulation coverage and is not reported as a real Safari test |

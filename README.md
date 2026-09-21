@@ -13,7 +13,9 @@ npm install
 npm run dev
 ```
 
-Open `http://127.0.0.1:5173`. Audio starts only after pressing Play. All runtime audio is stored in the repository, so playback makes no remote requests.
+Open `http://127.0.0.1:5173`. The live Hero remains silent; audio starts only after entering the Active Map or pressing Play. All runtime audio is stored in the repository, so playback makes no remote requests.
+
+Selecting a marker keeps its place highlighted, fades the other markers, opens its current-day details and isolates its continuous activity voice. Selecting another marker crossfades to the new voice; hovering previews an activity without changing the underlying map or schedule data.
 
 ## Source data
 
@@ -46,7 +48,7 @@ The reviewed 1440-pixel full-page capture is in `docs/screenshots/desktop-1440.p
 
 - `src/activity.ts` — pure schedule, density and intensity calculations
 - `src/data/` — generated source data and TypeScript types
-- `src/components/` — desktop map, detail dialog and controls
+- `src/components/` — live Hero, desktop map, detail dialog and controls
 - `src/audio/` — UI-independent Web Audio engine and score model
 - `scripts/import_sources.py` — reproducible XLSX/SVG import and validation
 - `scripts/download_audio.py` — reproducible CC0 asset download and hash check

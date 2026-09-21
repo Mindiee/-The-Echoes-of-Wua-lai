@@ -3,9 +3,9 @@ import type { ActivityState } from '../activity'
 import { buildVoices, type VoiceSpec } from './score'
 
 export type AudioState = { status: 'idle' | 'loading' | 'playing' | 'paused' | 'error'; error: string }
-type Asset = 'metal' | 'light-metal' | 'marimba' | 'crowd' | 'bell' | 'pluck'
+type Asset = 'metal' | 'light-metal' | 'marimba' | 'bell' | 'pluck'
 type Voice = { spec: VoiceSpec; bus: GainNode; pan: StereoPannerNode; next: number; event: number; sources: Set<AudioScheduledSourceNode> }
-const ASSETS: Asset[] = ['metal','light-metal','marimba','crowd','bell','pluck']
+const ASSETS: Asset[] = ['metal','light-metal','marimba','bell','pluck']
 const FADE = .8
 const MELODY = [60, 64, 67, 69, 67, 62, 64, 60]
 
@@ -22,6 +22,7 @@ export class SoundscapeEngine {
   private loadAbort?: AbortController
   private generation = 0
   private muted = false
+  private soloPlaceId?: string
   private disposed = false
   private activity: ActivityState = { activeIds: [], byCategory: {} as ActivityState['byCategory'], density: 0, intensity: 0 }
 
@@ -130,6 +131,12 @@ export class SoundscapeEngine {
     if (this.master && this.state.status === 'playing') this.ramp(this.master.gain, muted ? 0 : .7, .08)
   }
 
+  setSolo(placeId?: string, fade = FADE) {
+    if (this.soloPlaceId === placeId) return
+    this.soloPlaceId = placeId
+    if (this.state.status === 'playing') this.reconcile(fade)
+  }
+
   pause() {
     if (this.disposed) return
     if (this.state.status === 'loading') this.loadAbort?.abort()
@@ -157,11 +164,11 @@ export class SoundscapeEngine {
     this.later(() => { voice.bus.disconnect(); voice.pan.disconnect(); this.retired.delete(voice) }, (seconds + .08) * 1000)
   }
 
-  private reconcile() {
-    const specs = buildVoices(data, this.activity)
+  private reconcile(fade = FADE) {
+    const specs = buildVoices(data, this.activity, this.soloPlaceId)
     const wanted = new Set(specs.map(s => s.key))
     for (const [key, voice] of this.voices) if (!wanted.has(key)) {
-      this.voices.delete(key); this.retire(voice, FADE)
+      this.voices.delete(key); this.retire(voice, fade)
     }
     for (const spec of specs) {
       const existing = this.voices.get(spec.key)
@@ -170,7 +177,7 @@ export class SoundscapeEngine {
       const bus = context.createGain(); bus.gain.value = 0
       const pan = context.createStereoPanner(); pan.pan.value = spec.pan
       bus.connect(pan); pan.connect(this.master!)
-      this.ramp(bus.gain, spec.gain, FADE)
+      this.ramp(bus.gain, spec.gain, fade)
       const index = Number(spec.placeId.slice(1))
       this.voices.set(spec.key, { spec, bus, pan, next: context.currentTime + .05 + (index % 7) * .1, event: index, sources: new Set() })
     }
@@ -195,11 +202,11 @@ export class SoundscapeEngine {
     const context = this.context!
     const buffer = this.buffers.get(asset)!
     const node = context.createBufferSource(); node.buffer = buffer; node.playbackRate.value = rate
-    const offset = asset === 'crowd' ? (voice.event * .71) % Math.max(.1, buffer.duration - 3.5) : 0
+    const offset = 0
     const duration = Math.max(.02, Math.min(limit, (buffer.duration - offset) / rate))
     const envelope = context.createGain()
-    const attack = Math.min(duration / 4, asset === 'crowd' ? .35 : .008)
-    const release = Math.min(duration / 3, asset === 'crowd' ? .6 : .12)
+    const attack = Math.min(duration / 4, .008)
+    const release = Math.min(duration / 3, .12)
     envelope.gain.setValueAtTime(0, at)
     envelope.gain.linearRampToValueAtTime(level, at + attack)
     envelope.gain.setValueAtTime(level, at + duration - release)
@@ -223,6 +230,22 @@ export class SoundscapeEngine {
     node.start(at); node.stop(at + 4)
   }
 
+  private texture(voice: Voice, at: number, note: number) {
+    const context = this.context!
+    const node = context.createOscillator(); node.type = 'triangle'; node.frequency.value = 440 * 2 ** ((note - 69) / 12)
+    const filter = context.createBiquadFilter(); filter.type = 'lowpass'; filter.frequency.value = 720; filter.Q.value = 2
+    const envelope = context.createGain()
+    const duration = Math.max(2.4, Math.min(5, voice.spec.interval * 1.2))
+    envelope.gain.setValueAtTime(0, at)
+    envelope.gain.linearRampToValueAtTime(.12, at + .45)
+    envelope.gain.setValueAtTime(.12, at + Math.max(.5, duration - .7))
+    envelope.gain.linearRampToValueAtTime(0, at + duration)
+    node.connect(filter); filter.connect(envelope); envelope.connect(voice.bus)
+    voice.sources.add(node)
+    node.onended = () => { voice.sources.delete(node); node.disconnect(); filter.disconnect(); envelope.disconnect() }
+    node.start(at); node.stop(at + duration)
+  }
+
   private event(voice: Voice, at: number) {
     const note = MELODY[voice.event % MELODY.length]
     switch (voice.spec.role) {
@@ -232,8 +255,9 @@ export class SoundscapeEngine {
         this.sample(voice, 'marimba', at + .09, 2 ** ((note - 59) / 12), 2.2, .8)
         break
       case 'Market':
-        this.sample(voice, 'crowd', at, 1, 3.2, .7)
-        this.sample(voice, 'light-metal', at + .18, .65, .35, .35)
+        this.texture(voice, at, note - 12)
+        this.sample(voice, 'marimba', at + .14, 2 ** ((note - 59) / 12), 2, .45)
+        this.sample(voice, 'light-metal', at + .42, .72, .3, .22)
         break
       case 'Respect': this.sample(voice, 'bell', at, .75, 5, .6); this.drone(voice, at); break
       case 'Culture': this.sample(voice, 'pluck', at, 2 ** ((note - 60) / 12), 2); break

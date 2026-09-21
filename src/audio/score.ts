@@ -3,15 +3,15 @@ import type { SoundType, SourceData } from '../data/types'
 
 export type VoiceSpec = { key: string; placeId: string; role: SoundType; weight: number; gain: number; interval: number; pan: number }
 const gains: Record<SoundType, number> = { 'Main Craft': .075, 'Soft Craft': .065, Market: .05, Respect: .055, Culture: .07 }
-const baseIntervals: Record<SoundType, number> = { 'Main Craft': 2.4, 'Soft Craft': 4.2, Market: 9, Respect: 14, Culture: 5.5 }
+const baseIntervals: Record<SoundType, number> = { 'Main Craft': 1.8, 'Soft Craft': 2.8, Market: 4, Respect: 6.5, Culture: 3.6 }
 
 export function eventInterval(role: SoundType, roleIntensity: number): number {
   return baseIntervals[role] / (1 + Math.min(roleIntensity, 20) / 10)
 }
 
-export function buildVoices(source: SourceData, state: ActivityState): VoiceSpec[] {
+export function buildVoices(source: SourceData, state: ActivityState, soloPlaceId?: string): VoiceSpec[] {
   const active = new Set(state.activeIds)
-  const places = source.places.filter(p => active.has(p.id))
+  const places = source.places.filter(p => active.has(p.id) && (!soloPlaceId || p.id === soloPlaceId))
   const roleIntensity = new Map<SoundType, number>()
   for (const place of places) for (const role of place.soundTypes) {
     roleIntensity.set(role, (roleIntensity.get(role) ?? 0) + source.weights[place.category] / place.soundTypes.length)

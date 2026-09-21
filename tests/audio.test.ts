@@ -26,4 +26,12 @@ describe('sound mapping and density', () => {
     const morning = buildVoices(data, calculateActivity(data, 0, 540))
     expect(noon.find(v => v.placeId === 'P01')!.gain).toBe(morning.find(v => v.placeId === 'P01')!.gain)
   })
+  it('can isolate one activity without changing its sound mapping', () => {
+    const state = calculateActivity(data, 0, 720)
+    const all = buildVoices(data, state)
+    const solo = buildVoices(data, state, 'P20')
+    expect(solo).toHaveLength(1)
+    expect(solo[0].placeId).toBe('P20')
+    expect(solo[0].role).toBe(all.find(v => v.placeId === 'P20')!.role)
+  })
 })
