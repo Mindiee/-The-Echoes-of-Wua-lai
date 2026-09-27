@@ -41,18 +41,17 @@ async function energy(page: Page) {
   })
 }
 
-test('hero gesture starts musical samples, selection persists with crossfade, pauses and stays unique', async ({ page }) => {
+test('play gesture starts musical samples, selection persists with crossfade, pauses and stays unique', async ({ page }) => {
   await instrumentAudio(page)
   const requestedAudio: string[] = []
   page.on('request', request => { if (request.url().includes('/audio/')) requestedAudio.push(request.url()) })
   await page.goto('/')
   await requireWebAudio(page)
   expect(await page.evaluate(() => (window as unknown as {audioProbe:{contexts:AudioContext[]}}).audioProbe.contexts.length)).toBe(0)
-  await page.getByRole('button', {name:'Enter the active map'}).click()
+  await page.getByRole('button', {name:'Play soundscape',exact:true}).click()
   await expect(page.getByRole('button', { name: 'Pause soundscape', exact: true })).toBeVisible()
-  // The live Hero can be entered during Wua-lai's closed overnight hours.
-  // Pin this sound assertion to the Monday noon reference state.
-  await page.getByRole('slider', {name:'Day',exact:true}).fill('1')
+  // Pin the sound assertion to the Monday noon reference state.
+  await page.getByRole('button', {name:'Monday',exact:true}).click()
   await page.getByRole('slider', {name:'Time',exact:true}).fill('720')
   await expect.poll(() => energy(page), {timeout:10000}).toBeGreaterThan(0.0001)
   expect(requestedAudio.some(url => url.endsWith('/crowd.mp3'))).toBe(false)
@@ -68,6 +67,11 @@ test('hero gesture starts musical samples, selection persists with crossfade, pa
   await page.keyboard.press('Enter')
   await expect(page.locator('#experience [data-place=P01]').first()).toHaveAttribute('data-selected', 'true')
   expect(await page.evaluate(() => (window as unknown as {audioProbe:{fadeDurations:number[]}}).audioProbe.fadeDurations.some(t=>t>.75&&t<.85))).toBe(true)
+  await page.getByRole('link',{name:'About Wua-lai',exact:true}).click()
+  await expect.poll(() => energy(page), {timeout:10000}).toBeGreaterThan(.0001)
+  await page.getByRole('link',{name:'Method',exact:true}).click()
+  await page.getByRole('link',{name:'Soundscape',exact:true}).click()
+  await expect(page.locator('#experience [data-place=P01]').first()).toHaveAttribute('data-selected','true')
   await page.getByRole('slider', {name:'Time',exact:true}).fill('1440')
   await expect(page.locator('.playback-state')).toContainText('no active activities')
   await expect.poll(() => energy(page)).toBeLessThan(0.00001)

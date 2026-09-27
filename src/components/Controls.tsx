@@ -1,14 +1,15 @@
 import { days, fullDays } from '../data'
 import { formatTime } from '../activity'
+import type { ActivityState } from '../activity'
 
 type Props = {
-  day: number; minute: number; count: number; realtime: boolean
+  day: number; minute: number; count: number; byCategory: ActivityState['byCategory']; realtime: boolean
   muted: boolean; dark: boolean; roads: boolean; playing: boolean; loading: boolean; error: string
   onDay: (day: number) => void; onMinute: (minute: number) => void; onRealtime: () => void
   onMethod: () => void; onTheme: () => void; onRoads: () => void; onPlay: () => void
 }
 
-const legend = [['Temple','#EAAB1D'],['Workshop','#E94A35'],['Museum','#BC522A'],['Market','#007A9B'],['Crafthouse','#B8B19E']]
+const legend = [['Temple','#EAAB1D','เสียงสวดและระฆัง'],['Workshop','#E94A35','เสียงตอกดุนลายเงิน'],['Museum','#BC522A','พิพิธภัณฑ์มรดก'],['Market','#007A9B','ตลาดคนเดินวัวลาย'],['Crafthouse','#B8B19E','บ้านช่างชุมชน']] as const
 
 function Icon({name}: {name: 'method' | 'theme' | 'road' | 'play' | 'pause'}) {
   return <svg className="control-icon" viewBox="0 0 20 20" aria-hidden="true">
@@ -22,20 +23,21 @@ function Icon({name}: {name: 'method' | 'theme' | 'road' | 'play' | 'pause'}) {
 
 export function Controls(p: Props) {
   return <aside className="controls" aria-label="Soundscape controls">
-    <h2>The Echoes of Wua-lai</h2>
+    <div className="control-panel">
+    <h1 className="sr-only">The Echoes of Wua-lai</h1>
     <p className="active-count" aria-live="polite"><span className={`status-dot ${p.playing && !p.muted ? 'playing' : ''}`} />
       <span data-testid="active-count">{p.count} ACTIVE ACTIVITIES</span></p>
     <ul className="legend" aria-label="Activity legend">
-      {legend.map(([name,color]) => <li key={name}><span style={{ background: color }} className={`legend-dot ${name === 'Crafthouse' ? 'outlined' : ''}`} />{name}</li>)}
+      {legend.map(([name,color,description]) => <li key={name}><span style={{ background: color }} className={`legend-dot ${name === 'Crafthouse' ? 'outlined' : ''}`} /><span>{name}</span><span className="legend-description" lang="th">{description}</span><span className="node-count">{name==='Market' ? p.byCategory['Silver Shop']+p.byCategory['Market Night'] : p.byCategory[name]} nodes</span></li>)}
     </ul>
-    <button className="realtime-button" aria-pressed={p.realtime} onClick={p.onRealtime}>REAL TIME</button>
     <div className="timeline">
       <label htmlFor="time">TIME <output htmlFor="time">{formatTime(p.minute)}</output></label>
       <input id="time" aria-label="Time" aria-valuetext={formatTime(p.minute)} type="range" min="0" max="1440" step="1" value={p.minute} onChange={e => p.onMinute(Number(e.target.value))} />
       <div className="ticks" aria-hidden="true"><span>00</span><span>06</span><span>12</span><span>18</span><span>24</span></div>
-      <label htmlFor="day">DAY</label>
-      <input id="day" aria-label="Day" aria-valuetext={fullDays[p.day]} type="range" min="0" max="6" step="1" value={(p.day + 1) % 7} onChange={e => p.onDay((Number(e.target.value) + 6) % 7)} />
-      <div className="ticks day-ticks" aria-hidden="true">{[6,0,1,2,3,4,5].map(d => <span key={d}>{days[d]}</span>)}</div>
+      <div className="realtime-row"><button className="realtime-button" aria-label="REAL TIME" aria-pressed={p.realtime} onClick={p.onRealtime}>Real Time</button></div>
+      <span className="day-label" id="day-label">DAY</span>
+      <div className="day-buttons" role="group" aria-labelledby="day-label">{[6,0,1,2,3,4,5].map(d => <button key={d} aria-label={fullDays[d]} aria-pressed={d===p.day} onClick={()=>p.onDay(d)}>{days[d]}</button>)}</div>
+    </div>
     </div>
     <div className="actions">
       <button className="circle-control" aria-label="View how it works" aria-pressed="false" onClick={p.onMethod} title="How it works"><Icon name="method" /></button>

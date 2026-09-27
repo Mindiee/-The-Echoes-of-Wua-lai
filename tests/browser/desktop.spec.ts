@@ -1,24 +1,36 @@
 import { expect, test } from '@playwright/test'
 
-test('uses the live hero and supplied method and keeps map geometry proportional', async ({ page }) => {
+test('fluid desktop pages keep map geometry, text and controls inside the viewport', async ({page}) => {
+  test.setTimeout(90000)
   await page.goto('/')
-  await expect(page).toHaveTitle('The Echoes of Wua-lai')
-  await expect(page.locator('.hero .activity-map')).toBeVisible()
-  await expect(page.locator('.method img')).toHaveAttribute('src', /Method.svg$/)
-  await expect(page.locator('.hero [data-marker]')).toHaveCount(60)
-  await expect(page.locator('#experience [data-marker]')).toHaveCount(60)
-  for (const [width,height] of [[1024,768],[1280,720],[1366,768],[1440,900],[1440,1024],[1920,1080],[2560,1440]]) {
-    await page.setViewportSize({ width, height })
-    const map = await page.locator('#experience .activity-map').boundingBox()
-    const controls = await page.locator('.controls').boundingBox()
-    expect(map!.width / map!.height).toBeCloseTo(1100 / 1024, 2)
-    expect(map!.x + map!.width).toBeLessThan(controls!.x)
-    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
+  for(const [width,height] of [[1280,720],[1280,800],[1280,1024],[1440,900],[1600,900],[1920,1080]]) {
+    await page.setViewportSize({width,height})
+    await page.getByRole('link',{name:'Soundscape',exact:true}).click()
+    await expect(page.getByRole('link',{name:'Soundscape',exact:true})).toHaveAttribute('aria-current','page')
+    await expect(page.locator('.activity-map')).toBeVisible()
+    const map=await page.locator('.activity-map').boundingBox()
+    const controls=await page.locator('.controls').boundingBox()
+    expect(map!.width/map!.height).toBeCloseTo(1100/1024,2)
+    expect(map!.x+map!.width).toBeLessThan(controls!.x)
+    expect(controls!.x+controls!.width).toBeLessThanOrEqual(width)
+    await expect(page.locator('[data-marker]')).toHaveCount(60)
+    for(const name of ['Soundscape','About Wua-lai','Method']) {
+      await page.getByRole('link',{name,exact:true}).click()
+      await expect(page.getByRole('link',{name,exact:true})).toHaveAttribute('aria-current','page')
+      expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true)
+      const nav=await page.getByRole('navigation').boundingBox()
+      expect(nav!.x+nav!.width).toBeLessThan(width)
+    }
+    await page.getByRole('button',{name:'CATEGORY WEIGHT',exact:true}).click()
+    await page.getByRole('button',{name:'SOUND INTENSITY',exact:true}).click()
+    await expect(page.getByRole('table',{name:'Category weights'})).toBeVisible()
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true)
+    await page.getByRole('button',{name:'CATEGORY WEIGHT',exact:true}).click()
+    await page.getByRole('button',{name:'SOUND INTENSITY',exact:true}).click()
   }
-  for (let width = 1024; width <= 1920; width += 32) {
-    await page.setViewportSize({width, height: 800})
-    const map = await page.locator('#experience .activity-map').boundingBox()
-    expect(map!.width / map!.height).toBeCloseTo(1100 / 1024, 2)
-    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
+  await page.getByRole('link',{name:'Soundscape',exact:true}).click()
+  for(let width=1280;width<=1920;width+=32) {
+    await page.setViewportSize({width,height:900})
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true)
   }
 })

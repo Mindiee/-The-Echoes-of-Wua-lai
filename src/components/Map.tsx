@@ -47,11 +47,13 @@ export function Map({ activeIds, showRoads, selectedId, onSelect, interactive = 
           <path d={marker.geometry.d} fill="none" stroke="transparent" strokeWidth="16" className="hit-target" />
         </> : <>
           {marker.frame && !isCrafthouse && <rect x={marker.x - 4} y={marker.y - 4} width="8" height="8" fill="none" stroke="var(--ink)" strokeWidth=".7" />}
+          <g className="marker-pulse" style={{transformOrigin:`${marker.x}px ${marker.y}px`}}>
           {isCrafthouse
             ? <circle className="marker-visible" cx={marker.x} cy={marker.y} r="4" fill={isActive ? color : 'var(--paper)'} stroke={color} strokeWidth="1" />
             : marker.shape === 'path'
             ? <path className="marker-visible" d={marker.geometry.d} fill={isActive || marker.frame ? color : 'var(--paper)'} stroke={color} strokeWidth={marker.frame ? 1 : 1.4} />
             : <circle className="marker-visible" cx={marker.x} cy={marker.y} r={marker.geometry.r} fill={isActive ? color : 'var(--paper)'} stroke={color} strokeWidth="1" />}
+          </g>
           <circle className="focus-ring" cx={marker.x} cy={marker.y} r="10" />
           <circle className="hit-target" cx={marker.x} cy={marker.y} r="9" fill="transparent" />
         </>}

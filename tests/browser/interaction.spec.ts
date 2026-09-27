@@ -1,12 +1,15 @@
 import { expect, test, type Page } from '@playwright/test'
 
 export async function setSlider(page: Page, label: string, value: number) {
+  if (label === 'Day') { await page.getByRole('button', {name:['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][value],exact:true}).click(); return }
   const slider = page.getByRole('slider', { name: label, exact: true })
   await slider.fill(String(value))
 }
 
 test('day/time state, duplicate markers, details and appearance controls', async ({ page }) => {
   await page.goto('/#experience')
+  await setSlider(page,'Day',1)
+  await setSlider(page,'Time',720)
   await expect(page.getByTestId('active-count')).toHaveText('27 ACTIVE ACTIVITIES')
   await setSlider(page, 'Day', 6) // Saturday in SUN-first UI
   await setSlider(page, 'Time', 1140)
@@ -14,6 +17,7 @@ test('day/time state, duplicate markers, details and appearance controls', async
   await expect(page.locator('#experience [data-place=P14]')).toHaveAttribute('data-active', 'true')
   await page.locator('#experience [data-place=P14]').focus()
   await page.keyboard.press('Enter')
+  await expect(page.locator('#experience [data-place=P14]')).toHaveCSS('transform','none')
   await expect(page.getByRole('dialog')).toContainText('ถนนคนเดิน')
   await expect(page.getByRole('dialog')).toContainText('16:00–23:00')
   await page.keyboard.press('Escape')
@@ -38,73 +42,18 @@ test('day/time state, duplicate markers, details and appearance controls', async
   await expect(page.getByTestId('active-count')).toHaveText('0 ACTIVE ACTIVITIES')
 })
 
-test('interactive hero, unified icon controls, persistent marker selection and method reveal', async ({page}) => {
-  await page.emulateMedia({reducedMotion:'reduce'})
-  await page.goto('/')
-  await expect(page.locator('.hero .activity-map')).toBeVisible()
-  await expect(page.locator('.hero-copy h1')).toContainText('The Echoes of Wua-lai')
-  await expect(page.locator('.hero-description')).toHaveText('A sound map revealing the rhythm of Wua-lai, Chiang Mai, through its everyday activities.')
-  const sequence = await Promise.all(['.hero-copy h1','.hero-map','.hero-description'].map(selector =>
-    page.locator(selector).evaluate(element => {
-      const style = getComputedStyle(element)
-      return { name: style.animationName, delay: parseFloat(style.animationDelay), duration: parseFloat(style.animationDuration) }
-    })))
-  expect(sequence.map(stage => stage.name)).toEqual(['heroTitleTravel','heroMapOpen','heroDescriptionReveal'])
-  expect(sequence[0].delay).toBeLessThan(sequence[1].delay)
-  expect(sequence[0].delay + sequence[0].duration).toBeCloseTo(sequence[1].delay + sequence[1].duration, 1)
-  expect(sequence[1].delay + sequence[1].duration).toBeLessThanOrEqual(sequence[2].delay)
-  await page.locator('.hero-enter').evaluate(root => {
-    for (const selector of ['.hero-copy h1','.hero-map','.hero-description']) {
-      const animation = root.querySelector(selector)?.getAnimations()[0]
-      animation?.pause()
-      if (animation) animation.currentTime = 0
-    }
-  })
-  const heroBox = await page.locator('.hero-enter').boundingBox()
-  const titleStart = await page.locator('.hero-copy h1').boundingBox()
-  expect(titleStart!.x).toBeLessThan(heroBox!.x + heroBox!.width * .22)
-  await page.locator('.hero-enter').evaluate(root => {
-    for (const selector of ['.hero-copy h1','.hero-map','.hero-description']) {
-      const animation = root.querySelector(selector)?.getAnimations()[0]
-      if (animation) animation.currentTime = 2600
-    }
-  })
-  const titleEnd = await page.locator('.hero-copy h1').boundingBox()
-  expect(titleEnd!.x).toBeGreaterThan(heroBox!.x + heroBox!.width * .52)
-  expect(titleEnd!.x - titleStart!.x).toBeGreaterThan(heroBox!.width * .42)
-  await page.locator('.hero-enter').evaluate(root => {
-    for (const selector of ['.hero-copy h1','.hero-map','.hero-description']) root.querySelector(selector)?.getAnimations()[0]?.play()
-  })
-  await expect(page.locator('.hero .map-marker')).toHaveCount(60)
-  await expect(page.locator('.hero [data-category="Crafthouse"] rect')).toHaveCount(0)
-  await page.getByRole('button', {name:'Enter the active map'}).click()
-  await expect(page.locator('#experience')).toBeInViewport()
-  await expect(page.locator('.actions .control-icon')).toHaveCount(4)
-  const marker = page.locator('#experience [data-place=P20]').first()
-  await marker.hover()
-  await expect(marker).toHaveAttribute('data-hovered', 'true')
-  await expect(page.locator('#experience .map-marker[data-dimmed=true]').first()).toBeVisible()
-  await marker.click()
-  await page.locator('.controls').hover()
-  await expect(marker).toHaveAttribute('data-selected', 'true')
-  await expect(page.getByRole('dialog')).toContainText('Crafthouse')
-  await expect(page.getByRole('dialog')).toContainText(/Active|Inactive/)
-  await expect(page.locator('#experience .map-marker[data-dimmed=true]').first()).toBeVisible()
-  await page.getByRole('button', {name:'View how it works'}).click()
-  await expect(page.locator('.method')).toHaveAttribute('data-revealed', 'true')
-  await expect(page.locator('.method')).toBeInViewport()
-})
-
 test('active markers glow continuously and hover tooltip avoids its marker', async ({page}) => {
   await page.emulateMedia({reducedMotion:'reduce'})
   await page.goto('/#experience')
+  await setSlider(page,'Day',1)
+  await setSlider(page,'Time',720)
   const activeMarker = page.locator('#experience [data-place=P20]').first()
   await expect(activeMarker).toHaveAttribute('data-active', 'true')
-  const visibleShape = activeMarker.locator('.marker-visible')
-  await expect(visibleShape).toHaveCSS('animation-name', 'activeMarkerGlow')
+  const visibleShape = activeMarker.locator('.marker-pulse')
+  await expect(visibleShape).toHaveCSS('animation-name', 'activeMarkerPulse')
   await expect(page.locator('#experience .marker-ripple')).toHaveCount(0)
   await expect(page.getByRole('button', {name:'Play soundscape',exact:true})).toBeVisible()
-  await expect(visibleShape).toHaveCSS('animation-name', 'activeMarkerGlow')
+  await expect(visibleShape).toHaveCSS('animation-name', 'activeMarkerPulse')
 
   const edgeMarker = page.locator('#experience [data-marker=m123]')
   await edgeMarker.hover()
