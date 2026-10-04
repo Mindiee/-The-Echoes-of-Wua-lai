@@ -50,8 +50,9 @@ test('active markers emit continuous fading rings and hover tooltip avoids its m
   const activeMarker = page.locator('#experience [data-place=P20]').first()
   await expect(activeMarker).toHaveAttribute('data-active', 'true')
   const rings = activeMarker.locator('.marker-ring')
-  await expect(rings).toHaveCount(2)
+  await expect(rings).toHaveCount(1)
   await expect(rings.first()).toHaveCSS('animation-name', 'activeMarkerRing')
+  expect(Number(await rings.first().evaluate(element => getComputedStyle(element).getPropertyValue('opacity')))).toBeLessThanOrEqual(.3)
   await expect(activeMarker.locator('.marker-visible')).toHaveCSS('filter', 'none')
   await expect(activeMarker.locator('.marker-visible')).toHaveCSS('animation-name', 'none')
   const frames = await rings.first().evaluate(element => {

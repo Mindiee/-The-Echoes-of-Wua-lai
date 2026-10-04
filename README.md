@@ -15,11 +15,11 @@ npm run dev
 
 Open `http://127.0.0.1:5173`. The Soundscape opens at the current time in `Asia/Bangkok` and attempts to start audio immediately. If the browser blocks autoplay, it shows “Tap Play to start sound.”; pressing Play or a marker starts playback. The header switches between Soundscape, About Wua-lai, and Method while preserving the selected time, place, and sound state. All runtime audio is stored in the repository, so playback makes no remote requests.
 
-Selecting a marker keeps its place highlighted, fades the other markers, opens its current-day details and isolates its continuous activity voice. Selecting another marker crossfades to the new voice. Hovering previews an activity and shows an automatically positioned tooltip. Every active point stays fixed while two category-colored rings expand outward and fade continuously for its entire active period, independently of audio playback. P14 pulses its stroke width without moving its route geometry. Times with no active places remain silent.
+Selecting a marker keeps its place highlighted, fades the other markers, opens its current-day details and isolates its continuous activity voice. Selecting another marker crossfades to the new voice. Hovering previews an activity and shows an automatically positioned tooltip. Every active point stays fixed while one translucent category-colored ring expands outward and fades continuously for its entire active period, independently of audio playback. P14 pulses its stroke width without moving its route geometry. Times with no active places remain silent.
 
 ## Source data
 
-The original prompt, ZIP, workbook and annotated position SVG are preserved in `sources/`. The latest UI package is preserved in `sources/ui-v4/` with SHA-256 documented in `docs/UI_REFRESH_PROGRESS.md`. Original photographs extracted without recompression are served from `public/about/`.
+The original prompt, ZIP, workbook and annotated position SVG are preserved in `sources/`. The UI package is preserved in `sources/ui-v4/`, and the latest desktop/mobile control-panel references are in `sources/ui-v5/`. Original photographs extracted without recompression are served from `public/about/`.
 
 Regenerate the typed web data after replacing a source workbook or SVG:
 

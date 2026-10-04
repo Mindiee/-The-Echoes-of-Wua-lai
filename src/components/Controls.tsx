@@ -21,8 +21,18 @@ function Icon({name}: {name: 'method' | 'theme' | 'road' | 'play' | 'pause'}) {
   </svg>
 }
 
+function ActionButtons({ p, className }: { p: Props; className: string }) {
+  return <div className={`actions ${className}`}>
+    <button className="circle-control" aria-label="View how it works" aria-pressed="false" onClick={p.onMethod} title="How it works"><Icon name="method" /></button>
+    <button className="circle-control" aria-label="Night mode" aria-pressed={p.dark} onClick={p.onTheme} title="Day / night mode"><Icon name="theme" /></button>
+    <button className="circle-control" aria-label="Show roads" aria-pressed={p.roads} onClick={p.onRoads} title="Show / hide roads"><Icon name="road" /></button>
+    <button className={`circle-control ${p.loading ? 'loading' : ''}`} aria-label={p.loading ? 'Cancel loading soundscape' : p.playing ? 'Pause soundscape' : 'Play soundscape'} aria-pressed={p.playing} onClick={p.onPlay} title={p.playing ? 'Pause' : 'Play'}><Icon name={p.playing ? 'pause' : 'play'} /></button>
+  </div>
+}
+
 export function Controls(p: Props) {
   return <aside className="controls" aria-label="Soundscape controls">
+    <ActionButtons p={p} className="mobile-actions" />
     <div className="control-panel">
     <h1 className="sr-only">The Echoes of Wua-lai</h1>
     <p className="active-count" aria-live="polite"><span className={`status-dot ${p.playing && !p.muted ? 'playing' : ''}`} />
@@ -39,12 +49,7 @@ export function Controls(p: Props) {
       <div className="day-buttons" role="group" aria-labelledby="day-label">{[6,0,1,2,3,4,5].map(d => <button key={d} aria-label={fullDays[d]} aria-pressed={d===p.day} onClick={()=>p.onDay(d)}>{days[d]}</button>)}</div>
     </div>
     </div>
-    <div className="actions">
-      <button className="circle-control" aria-label="View how it works" aria-pressed="false" onClick={p.onMethod} title="How it works"><Icon name="method" /></button>
-      <button className="circle-control" aria-label="Night mode" aria-pressed={p.dark} onClick={p.onTheme} title="Day / night mode"><Icon name="theme" /></button>
-      <button className="circle-control" aria-label="Show roads" aria-pressed={p.roads} onClick={p.onRoads} title="Show / hide roads"><Icon name="road" /></button>
-      <button className={`circle-control ${p.loading ? 'loading' : ''}`} aria-label={p.loading ? 'Cancel loading soundscape' : p.playing ? 'Pause soundscape' : 'Play soundscape'} aria-pressed={p.playing} onClick={p.onPlay} title={p.playing ? 'Pause' : 'Play'}><Icon name={p.playing ? 'pause' : 'play'} /></button>
-    </div>
+    <ActionButtons p={p} className="desktop-actions" />
     <p className="playback-state" role="status">{p.loading ? 'Loading sound…' : p.blocked ? 'Tap Play to start sound.' : p.playing ? p.muted ? 'Playing · muted' : p.count ? 'Soundscape playing' : 'Playing · no active activities' : ''}</p>
     {p.error && <p className="audio-error" role="alert">{p.error} <button onClick={p.onPlay}>Try again</button></p>}
   </aside>

@@ -10,9 +10,14 @@ test('fluid desktop pages keep map geometry, text and controls inside the viewpo
     await expect(page.locator('.activity-map')).toBeVisible()
     const map=await page.locator('.activity-map').boundingBox()
     const controls=await page.locator('.controls').boundingBox()
+    const panel=await page.locator('.control-panel').boundingBox()
     expect(map!.width/map!.height).toBeCloseTo(1100/1024,2)
     expect(map!.x+map!.width).toBeLessThan(controls!.x)
     expect(controls!.x+controls!.width).toBeLessThanOrEqual(width)
+    if(width===1280&&height===1024){
+      expect(panel!.width).toBeGreaterThanOrEqual(315)
+      expect(Number.parseFloat(await page.locator('.control-panel').evaluate(element=>getComputedStyle(element).borderTopLeftRadius))).toBeGreaterThanOrEqual(16)
+    }
     await expect(page.locator('[data-marker]')).toHaveCount(60)
     for(const name of ['Soundscape','About Wua-lai','Method']) {
       await page.getByRole('link',{name,exact:true}).click()

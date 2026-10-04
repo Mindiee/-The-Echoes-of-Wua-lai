@@ -4,9 +4,11 @@ Run date: 2026-09-27 (Asia/Bangkok). Host: Windows desktop environment.
 
 Mobile layout update: 2026-10-04 (Asia/Bangkok). The phone layout places the original SVG map above the controls, keeps the source geometry, enlarges navigation and control touch targets, moves selected-place details below the map, widens About slides, and fits Method tables to narrow screens. Activity, source data, time and audio logic were unchanged.
 
+The latest control-panel comparison captures are `docs/screenshots/ui-v5/control-panel-desktop-1280.png` and `docs/screenshots/ui-v5/control-panel-mobile-394.png`. The panel matches the supplied desktop card bounds (about x=914–1239, y=258–675) and the phone card/controls order (buttons above the card, about x=32–358, y=530–947). Dynamic map activity and audio status are expected to differ from the static SVG examples.
+
 ## Automated coverage
 
-- Pulse ring/autoplay update, 2026-10-04: active points remain fixed while two category-colored rings expand from scale 1 to 2.6 and fade to zero, staggered by half a rhythm. Verified in Chromium/WebKit; inactive points have no rings. Chromium entry tests separately force allowed and blocked autoplay policies; allowed entry produces measurable audio without clicking, blocked entry exposes Play, and explicit Pause survives navigation. Browser policy cannot be overridden by the site. No-active-place times remain silent.
+- Pulse ring/control-panel update, 2026-10-04: active points remain fixed while one category-colored ring expands from scale 1 to 2.6 and fades from 0.28 opacity to zero. Inactive points have no rings. The desktop panel and phone layout were compared with the two new SVG references in `sources/ui-v5/`; phone controls sit above the rounded panel and retain 44px touch targets. Verified in Chromium/WebKit. Chromium entry tests separately force allowed and blocked autoplay policies; allowed entry produces measurable audio without clicking, blocked entry exposes Play, and explicit Pause survives navigation. Browser policy cannot be overridden by the site. No-active-place times remain silent.
 
 - Python import audit: 6 tests covering workbook/SVG extraction, every pinned marker center, ordered preserved road geometry, road substitution and source constraints.
 - Vitest: 13 tests covering 10,087 weekly minute samples, open/close boundaries, `Close`, decimal times, 24:00, duplicate markers, approved density/intensity fixtures, audio voice/weight rules and activity soloing.
