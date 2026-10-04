@@ -62,7 +62,7 @@ test('active markers pulse without glow and hover tooltip avoids its marker', as
     })
   })
   expect(scales[0]).toBeCloseTo(1, 2)
-  expect(scales[1]).toBeCloseTo(1.18, 2)
+  expect(scales[1]).toBeCloseTo(1.7, 2)
   expect(scales[2]).toBeCloseTo(1, 2)
   await expect(page.locator('#experience .marker-ripple')).toHaveCount(0)
   await expect(page.getByRole('button', {name:'Play soundscape',exact:true})).toBeVisible()
