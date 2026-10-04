@@ -1,0 +1,78 @@
+import { expect, test } from '@playwright/test'
+
+test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true })
+
+test('mobile map and controls remain readable and separate at narrow widths', async ({ page }) => {
+  await page.goto('/')
+  for (const width of [320, 375, 390, 430]) {
+    await page.setViewportSize({ width, height: 844 })
+    const map = await page.locator('.activity-map').boundingBox()
+    const panel = await page.locator('.control-panel').boundingBox()
+    const controls = await page.locator('.controls').boundingBox()
+    expect(map).not.toBeNull()
+    expect(panel).not.toBeNull()
+    expect(controls).not.toBeNull()
+    expect(map!.width).toBeGreaterThan(width - 56)
+    expect(map!.width / map!.height).toBeCloseTo(1100 / 1024, 2)
+    expect(panel!.y).toBeGreaterThanOrEqual(map!.y + map!.height - 1)
+    expect(controls!.x).toBeGreaterThanOrEqual(0)
+    expect(controls!.x + controls!.width).toBeLessThanOrEqual(width)
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+    for (const button of await page.locator('.actions .circle-control').all()) {
+      const box = await button.boundingBox()
+      expect(box!.width).toBeGreaterThanOrEqual(44)
+      expect(box!.height).toBeGreaterThanOrEqual(44)
+    }
+    for (const name of ['Soundscape', 'About Wua-lai', 'Method']) {
+      const link = page.getByRole('link', { name, exact: true })
+      await expect(link).toBeVisible()
+      expect((await link.boundingBox())!.height).toBeGreaterThanOrEqual(44)
+    }
+    expect((await page.getByRole('slider', { name: 'Time' }).boundingBox())!.height).toBeGreaterThanOrEqual(44)
+  }
+})
+
+test('touching a marker reveals details without covering the map', async ({ page }) => {
+  await page.clock.setFixedTime(new Date('2026-09-28T05:00:00Z'))
+  await page.goto('/')
+  const marker = page.getByRole('button', { name: 'วัดศรีสุพรรณ, Temple, Active' }).first()
+  const box = await marker.boundingBox()
+  expect(box).not.toBeNull()
+  await page.touchscreen.tap(box!.x + box!.width / 2, box!.y + box!.height / 2)
+  const detail = page.getByRole('dialog', { name: /วัดศรีสุพรรณ/ })
+  await expect(detail).toBeVisible()
+  await expect(detail).toContainText('Active')
+  const map = await page.locator('.activity-map').boundingBox()
+  const panel = await detail.boundingBox()
+  expect(panel!.y).toBeGreaterThanOrEqual(map!.y + map!.height - 1)
+  expect(panel!.x).toBeGreaterThanOrEqual(0)
+  expect(panel!.x + panel!.width).toBeLessThanOrEqual(390)
+})
+
+test('About carousel and expanded Method tables fit a phone', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 700 })
+  await page.goto('/#about')
+  const carousel = page.getByRole('region', { name: 'Wua-lai photographs' })
+  await expect(carousel).toBeVisible()
+  await carousel.focus()
+  await page.keyboard.press('ArrowRight')
+  await expect(page.locator('.about-slide[data-current=true]')).toContainText('Silversmithing')
+  await expect.poll(async () => {
+    const track = await carousel.boundingBox()
+    const current = await page.locator('.about-slide[data-current=true]').boundingBox()
+    return Math.abs((track!.x + track!.width / 2) - (current!.x + current!.width / 2))
+  }).toBeLessThan(3)
+  const slide = await page.locator('.about-slide[data-current=true]').boundingBox()
+  expect(slide!.width).toBeGreaterThan(255)
+  expect(slide!.x).toBeGreaterThanOrEqual(0)
+  expect(slide!.x + slide!.width).toBeLessThanOrEqual(320)
+  await page.getByRole('link', { name: 'Method', exact: true }).click()
+  await page.getByRole('button', { name: 'CATEGORY WEIGHT', exact: true }).click()
+  await page.getByRole('button', { name: 'SOUND INTENSITY', exact: true }).click()
+  await expect(page.getByRole('table', { name: 'Category weights' })).toBeVisible()
+  await expect(page.getByRole('table', { name: 'Sound intensity examples' })).toBeVisible()
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+  const table = await page.getByRole('table', { name: 'Sound intensity examples' }).boundingBox()
+  expect(table!.x).toBeGreaterThanOrEqual(0)
+  expect(table!.x + table!.width).toBeLessThanOrEqual(320)
+})

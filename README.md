@@ -1,8 +1,8 @@
 # The Echoes of Wua-lai
 
-Interactive desktop soundscape of Wua-lai's craft activity. The React application uses the supplied SVG artwork and workbook data, then turns the active places at a selected day and minute into a five-role generative Web Audio score.
+Interactive soundscape of Wua-lai's craft activity. The React application uses the supplied SVG artwork and workbook data, then turns the active places at a selected day and minute into a five-role generative Web Audio score.
 
-The current delivery targets desktop browser viewports from 1280–1920 CSS pixels wide. The supplied 1280×1024 SVG is the visual reference; the map and content scale proportionally without fixed page dimensions. Mobile UI remains outside this iteration.
+The layout supports phones from 320 CSS pixels wide and desktop browser viewports from 1280–1920 CSS pixels wide. The supplied 1280×1024 SVG is the desktop visual reference; the map keeps its geometry while the phone layout places the map above its controls.
 
 ## Run locally
 
@@ -40,9 +40,9 @@ npx playwright install chromium firefox webkit
 npm run test:e2e
 ```
 
-The browser suite checks 1280×720, 1280×800, 1280×1024, 1440×900, 1600×900, and 1920×1080; continuous resize behavior; proportional map geometry; page navigation; carousel and disclosure keyboard behavior; marker state; and Web Audio failure/retry/cancellation. A separate DPR 2 Chromium project repeats the desktop geometry suite.
+The browser suite checks phones at 320, 375, 390, and 430 CSS pixels, plus 1280×720, 1280×800, 1280×1024, 1440×900, 1600×900, and 1920×1080 desktops; continuous resize behavior; proportional map geometry; touch selection; page navigation; carousel and disclosure keyboard behavior; marker state; and Web Audio failure/retry/cancellation. A separate DPR 2 Chromium project repeats the desktop geometry suite.
 
-Reviewed Map, About, and Method captures at 1280, 1440, 1600, and 1920 pixels are in `docs/screenshots/ui-v4/`.
+Reviewed Map, About, and Method captures at 1280, 1440, 1600, and 1920 pixels are in `docs/screenshots/ui-v4/`; phone captures are in `docs/screenshots/mobile/`.
 
 ## Project structure
 
