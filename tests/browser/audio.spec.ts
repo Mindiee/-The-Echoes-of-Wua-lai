@@ -47,7 +47,8 @@ test('play gesture starts musical samples, selection persists with crossfade, pa
   page.on('request', request => { if (request.url().includes('/audio/')) requestedAudio.push(request.url()) })
   await page.goto('/')
   await requireWebAudio(page)
-  expect(await page.evaluate(() => (window as unknown as {audioProbe:{contexts:AudioContext[]}}).audioProbe.contexts.length)).toBe(0)
+  await expect(page.getByText('Tap Play to start sound.')).toBeVisible()
+  expect(await page.evaluate(() => (window as unknown as {audioProbe:{contexts:AudioContext[]}}).audioProbe.contexts.length)).toBe(1)
   await page.getByRole('button', {name:'Play soundscape',exact:true}).click()
   await expect(page.getByRole('button', { name: 'Pause soundscape', exact: true })).toBeVisible()
   // Pin the sound assertion to the Monday noon reference state.

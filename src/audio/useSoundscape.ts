@@ -12,6 +12,12 @@ export function useSoundscape(activity: ActivityState, muted: boolean) {
   }, [])
   useEffect(() => { engine.current?.update(activity) }, [activity])
   useEffect(() => { engine.current?.setMuted(muted) }, [muted])
+  useEffect(() => {
+    const current = engine.current
+    queueMicrotask(() => {
+      if (current && engine.current === current) void current.play(true)
+    })
+  }, [])
   const start = () => { void engine.current?.play() }
   const solo = (placeId?: string, fade?: number) => { engine.current?.setSolo(placeId, fade) }
   const toggle = () => {
@@ -20,5 +26,5 @@ export function useSoundscape(activity: ActivityState, muted: boolean) {
     if (current.state.status === 'playing' || current.state.status === 'loading') current.pause()
     else void current.play()
   }
-  return { playing: state.status === 'playing', loading: state.status === 'loading', error: state.error, toggle, start, solo }
+  return { playing: state.status === 'playing', loading: state.status === 'loading', blocked: state.status === 'blocked', error: state.error, toggle, start, solo }
 }

@@ -13,9 +13,9 @@ npm install
 npm run dev
 ```
 
-Open `http://127.0.0.1:5173`. The Soundscape opens at the current time in `Asia/Bangkok` and remains silent until Play or a marker is pressed. The header switches between Soundscape, About Wua-lai, and Method while preserving the selected time, place, and sound state. All runtime audio is stored in the repository, so playback makes no remote requests.
+Open `http://127.0.0.1:5173`. The Soundscape opens at the current time in `Asia/Bangkok` and attempts to start audio immediately. If the browser blocks autoplay, it shows “Tap Play to start sound.”; pressing Play or a marker starts playback. The header switches between Soundscape, About Wua-lai, and Method while preserving the selected time, place, and sound state. All runtime audio is stored in the repository, so playback makes no remote requests.
 
-Selecting a marker keeps its place highlighted, fades the other markers, opens its current-day details and isolates its continuous activity voice. Selecting another marker crossfades to the new voice. Hovering previews an activity and shows an automatically positioned tooltip. Every active point gently expands and glows in its category color for its entire active period, independently of audio playback; P14 pulses through stroke and glow without changing its route geometry.
+Selecting a marker keeps its place highlighted, fades the other markers, opens its current-day details and isolates its continuous activity voice. Selecting another marker crossfades to the new voice. Hovering previews an activity and shows an automatically positioned tooltip. Every active point scales from 1 to 1.12 and back to 1 for its entire active period, independently of audio playback, with no glow. P14 pulses its stroke width by the same proportion without moving its route geometry. Times with no active places remain silent.
 
 ## Source data
 

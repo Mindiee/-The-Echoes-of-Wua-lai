@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-test('silent realtime entry and navigation preserve map state and history', async ({ page }) => {
+test('realtime entry and navigation preserve map state and history', async ({ page }) => {
   await page.clock.setFixedTime(new Date('2026-09-28T05:00:00Z'))
   await page.goto('/')
   await expect(page.locator('.hero')).toHaveCount(0)

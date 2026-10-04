@@ -2,7 +2,7 @@ import { data } from '../data'
 import type { ActivityState } from '../activity'
 import { buildVoices, type VoiceSpec } from './score'
 
-export type AudioState = { status: 'idle' | 'loading' | 'playing' | 'paused' | 'error'; error: string }
+export type AudioState = { status: 'idle' | 'loading' | 'playing' | 'paused' | 'blocked' | 'error'; error: string }
 type Asset = 'metal' | 'light-metal' | 'marimba' | 'bell' | 'pluck'
 type Voice = { spec: VoiceSpec; bus: GainNode; pan: StereoPannerNode; next: number; event: number; sources: Set<AudioScheduledSourceNode> }
 const ASSETS: Asset[] = ['metal','light-metal','marimba','bell','pluck']
@@ -94,15 +94,25 @@ export class SoundscapeEngine {
     return this.loadPromise
   }
 
-  async play() {
+  async play(autoplay = false) {
     if (this.disposed || this.state.status === 'playing' || this.state.status === 'loading') return
     const ticket = ++this.generation
     try {
       const context = this.init()
-      // resume is called synchronously within the click, before fetching files.
+      // On explicit Play, resume stays inside the user gesture before fetching.
       const resumed = context.resume()
       this.setState('loading')
-      await Promise.all([resumed, this.load(context)])
+      if (autoplay) {
+        // Blocked resume promises may remain pending until a user gesture.
+        // Bound the entry attempt so Play remains available in that case.
+        let timeout: ReturnType<typeof setTimeout> | undefined
+        await Promise.race([resumed.catch(() => {}), new Promise<void>(resolve => {
+          timeout = setTimeout(resolve, 600)
+        })]).finally(() => clearTimeout(timeout))
+        if (ticket !== this.generation || this.disposed) return
+        if (context.state !== 'running') { this.setState('blocked'); return }
+        await this.load(context)
+      } else await Promise.all([resumed, this.load(context)])
       if (ticket !== this.generation || this.disposed) return
       if (context.state !== 'running') throw new Error('Audio context did not start')
       this.setState('playing')

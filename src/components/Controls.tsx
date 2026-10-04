@@ -4,7 +4,7 @@ import type { ActivityState } from '../activity'
 
 type Props = {
   day: number; minute: number; count: number; byCategory: ActivityState['byCategory']; realtime: boolean
-  muted: boolean; dark: boolean; roads: boolean; playing: boolean; loading: boolean; error: string
+  muted: boolean; dark: boolean; roads: boolean; playing: boolean; loading: boolean; blocked: boolean; error: string
   onDay: (day: number) => void; onMinute: (minute: number) => void; onRealtime: () => void
   onMethod: () => void; onTheme: () => void; onRoads: () => void; onPlay: () => void
 }
@@ -45,7 +45,7 @@ export function Controls(p: Props) {
       <button className="circle-control" aria-label="Show roads" aria-pressed={p.roads} onClick={p.onRoads} title="Show / hide roads"><Icon name="road" /></button>
       <button className={`circle-control ${p.loading ? 'loading' : ''}`} aria-label={p.loading ? 'Cancel loading soundscape' : p.playing ? 'Pause soundscape' : 'Play soundscape'} aria-pressed={p.playing} onClick={p.onPlay} title={p.playing ? 'Pause' : 'Play'}><Icon name={p.playing ? 'pause' : 'play'} /></button>
     </div>
-    <p className="playback-state" role="status">{p.loading ? 'Loading sound…' : p.playing ? p.muted ? 'Playing · muted' : p.count ? 'Soundscape playing' : 'Playing · no active activities' : ''}</p>
+    <p className="playback-state" role="status">{p.loading ? 'Loading sound…' : p.blocked ? 'Tap Play to start sound.' : p.playing ? p.muted ? 'Playing · muted' : p.count ? 'Soundscape playing' : 'Playing · no active activities' : ''}</p>
     {p.error && <p className="audio-error" role="alert">{p.error} <button onClick={p.onPlay}>Try again</button></p>}
   </aside>
 }

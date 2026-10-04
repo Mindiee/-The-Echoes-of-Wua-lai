@@ -82,7 +82,7 @@ export default function App() {
           {selected && <PlaceDetail marker={selected} day={day} active={activity.activeIds.includes(selected.placeId)} onClose={closeDetail} />}
         </div>
         <Controls day={day} minute={minute} count={activity.density} byCategory={activity.byCategory} realtime={realtime} muted={muted} dark={dark} roads={roads}
-          playing={audio.playing} loading={audio.loading} error={audio.error} onDay={d => { setRealtime(false); setDay(d) }}
+          playing={audio.playing} loading={audio.loading} blocked={audio.blocked} error={audio.error} onDay={d => { setRealtime(false); setDay(d) }}
           onMinute={m => { setRealtime(false); setMinute(m) }} onRealtime={() => setRealtime(r => !r)}
           onMethod={showMethod} onTheme={() => setDark(d => !d)} onRoads={() => setRoads(r => !r)} onPlay={audio.toggle} />
       </div>
