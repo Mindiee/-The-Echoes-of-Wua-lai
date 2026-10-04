@@ -6,14 +6,14 @@ Mobile layout update: 2026-10-04 (Asia/Bangkok). The phone layout places the ori
 
 ## Automated coverage
 
-- Pulse/autoplay update, 2026-10-04: exact point scales 1 → 1.12 → 1 and no glow verified in Chromium/WebKit. Chromium entry tests separately force allowed and blocked autoplay policies; allowed entry produces measurable audio without clicking, blocked entry exposes Play, and explicit Pause survives navigation. Browser policy cannot be overridden by the site. No-active-place times remain silent.
+- Pulse ring/autoplay update, 2026-10-04: active points remain fixed while two category-colored rings expand from scale 1 to 2.6 and fade to zero, staggered by half a rhythm. Verified in Chromium/WebKit; inactive points have no rings. Chromium entry tests separately force allowed and blocked autoplay policies; allowed entry produces measurable audio without clicking, blocked entry exposes Play, and explicit Pause survives navigation. Browser policy cannot be overridden by the site. No-active-place times remain silent.
 
 - Python import audit: 6 tests covering workbook/SVG extraction, every pinned marker center, ordered preserved road geometry, road substitution and source constraints.
 - Vitest: 13 tests covering 10,087 weekly minute samples, open/close boundaries, `Close`, decimal times, 24:00, duplicate markers, approved density/intensity fixtures, audio voice/weight rules and activity soloing.
 - Desktop geometry: 1280×720, 1280×800, 1280×1024, 1440×900, 1600×900 and 1920×1080; map aspect, control separation, header containment and horizontal overflow checked after each live resize, plus continuous 32-pixel resize steps from 1280–1920.
 - DPR: Chromium desktop geometry repeated at device scale factors 1 and 2.
 - Phone geometry and interaction: Chromium and WebKit mobile emulation at 320, 375, 390 and 430 CSS pixels; map/control separation, aspect ratio, no horizontal overflow, 44px navigation and control targets, touch marker selection, About carousel centering and expanded Method tables.
-- Interaction: Bangkok real-time entry with a bounded autoplay attempt; hash navigation and history with preserved state; day buttons; minute selection; P14 fixed route; repeated P20 markers; persistent selection; point scale pulse (1 → 1.12 → 1) without glow; route stroke pulse without geometry movement; adaptive tooltip; About carousel keyboard endpoints; independent Method disclosures; icon controls; night theme and road visibility.
+- Interaction: Bangkok real-time entry with a bounded autoplay attempt; hash navigation and history with preserved state; day buttons; minute selection; P14 fixed route; repeated P20 markers; persistent selection; continuous expanding and fading rings around fixed active points; route stroke pulse without geometry movement; adaptive tooltip; About carousel keyboard endpoints; independent Method disclosures; icon controls; night theme and road visibility.
 - Audio on Chromium: user-gesture start, decoded local musical samples with measurable output, hover preview, persistent selection across page switches, smooth activity crossfades, silence at 24:00, pause/resume, one AudioContext, failed fetch/retry and cancellation during load. Crowd audio is not requested.
 
 ## Browser results

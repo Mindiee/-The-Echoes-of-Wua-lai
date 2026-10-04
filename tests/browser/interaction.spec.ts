@@ -42,34 +42,39 @@ test('day/time state, duplicate markers, details and appearance controls', async
   await expect(page.getByTestId('active-count')).toHaveText('0 ACTIVE ACTIVITIES')
 })
 
-test('active markers pulse without glow and hover tooltip avoids its marker', async ({page}) => {
+test('active markers emit continuous fading rings and hover tooltip avoids its marker', async ({page}) => {
   await page.emulateMedia({reducedMotion:'reduce'})
   await page.goto('/#experience')
   await setSlider(page,'Day',1)
   await setSlider(page,'Time',720)
   const activeMarker = page.locator('#experience [data-place=P20]').first()
   await expect(activeMarker).toHaveAttribute('data-active', 'true')
-  const visibleShape = activeMarker.locator('.marker-pulse')
-  await expect(visibleShape).toHaveCSS('animation-name', 'activeMarkerPulse')
+  const rings = activeMarker.locator('.marker-ring')
+  await expect(rings).toHaveCount(2)
+  await expect(rings.first()).toHaveCSS('animation-name', 'activeMarkerRing')
   await expect(activeMarker.locator('.marker-visible')).toHaveCSS('filter', 'none')
-  const scales = await visibleShape.evaluate(element => {
+  await expect(activeMarker.locator('.marker-visible')).toHaveCSS('animation-name', 'none')
+  const frames = await rings.first().evaluate(element => {
     const animation = element.getAnimations()[0]
     animation.pause()
     const timing = animation.effect!.getTiming()
-    return [0, .5, 1].map(progress => {
+    return [0, .5, .999].map(progress => {
       animation.currentTime = Number(timing.delay) + Number(timing.duration) * progress
-      return new DOMMatrix(getComputedStyle(element).transform).a
+      const computed = getComputedStyle(element)
+      return {scale: new DOMMatrix(computed.transform).a, opacity: Number(computed.opacity)}
     })
   })
-  expect(scales[0]).toBeCloseTo(1, 2)
-  expect(scales[1]).toBeCloseTo(1.7, 2)
-  expect(scales[2]).toBeCloseTo(1, 2)
-  await expect(page.locator('#experience .marker-ripple')).toHaveCount(0)
+  expect(frames[0].scale).toBeCloseTo(1, 2)
+  expect(frames[1].scale).toBeGreaterThan(1.7)
+  expect(frames[2].scale).toBeCloseTo(2.6, 2)
+  expect(frames[0].opacity).toBeGreaterThan(frames[1].opacity)
+  expect(frames[1].opacity).toBeGreaterThan(frames[2].opacity)
   await expect(page.getByRole('button', {name:'Play soundscape',exact:true})).toBeVisible()
-  await expect(visibleShape).toHaveCSS('animation-name', 'activeMarkerPulse')
+  await expect(rings.first()).toHaveCSS('animation-name', 'activeMarkerRing')
 
   const edgeMarker = page.locator('#experience [data-marker=m123]')
-  await edgeMarker.hover()
+  const edgeHitBox = await edgeMarker.locator('.hit-target').boundingBox()
+  await page.mouse.move(edgeHitBox!.x + edgeHitBox!.width / 2, edgeHitBox!.y + edgeHitBox!.height / 2)
   const tooltip = page.getByRole('tooltip')
   await expect(tooltip).toBeVisible()
   await expect(tooltip).toContainText('Silver Shop')
@@ -84,5 +89,5 @@ test('active markers pulse without glow and hover tooltip avoids its marker', as
 
   await setSlider(page, 'Time', 1440)
   await expect(activeMarker).toHaveAttribute('data-active', 'false')
-  await expect(visibleShape).toHaveCSS('animation-name', 'none')
+  await expect(activeMarker.locator('.marker-ring')).toHaveCount(0)
 })
