@@ -1,20 +1,17 @@
 # Sound sources
 
-All six sound pages were inspected on 2026-09-20 and explicitly identify the sound as **Creative Commons 0 (CC0)**. CC0 permits copying, adaptation and redistribution, including the sample files in this public repository. [CC0 1.0 terms](https://creativecommons.org/publicdomain/zero/1.0/).
+Updated 2026-10-12. All five runtime sounds are recordings of physical activities or an acoustic performance. No oscillator, generated melody or pitch transposition is used.
 
-Files are Freesound's publicly served high-quality MP3 preview encodings, downloaded from each sound page's actual player URL (not the login-only original download). Exact URLs are in `public/audio/manifest.json`, SHA-256 checksums in `docs/audio-hashes.json`. No account, API key or remote audio request is required at runtime.
+| Runtime file / role | Recording | Creator / source |
+|---|---|---|
+| metal.mp3 / Main Craft | Hammer striking metal; representative metalwork, not specifically silver | [Pagey1969](https://freesound.org/people/Pagey1969/sounds/566045/) |
+| craft.mp3 / Soft Craft | Hand sanding wood with sandpaper | [reg7783](https://freesound.org/people/reg7783/sounds/726831/) |
+| market.mp3 / Market | Calm indoor market in Chiang Mai | [kyles](https://freesound.org/people/kyles/sounds/177598/) |
+| temple.mp3 / Respect | Small Thai temple bell, single strike | [iluppai](https://freesound.org/people/iluppai/sounds/148849/) |
+| culture.mp3 / Culture | Live acoustic Asian flute improvisation; exact flute unspecified by uploader | [RutgerMuller](https://freesound.org/people/RutgerMuller/sounds/365258/) |
 
-| Local file | Creator | Source | Use / runtime modifications |
-|---|---|---|---|
-| metal.mp3 | alegemaate / Allan Legemaate | [Metal Hit](https://freesound.org/people/alegemaate/sounds/364706/) | Main Craft: short metallic strikes, repeated rhythmic events, fixed gain, stereo positioning |
-| light-metal.mp3 | freemaster2 | [metalhit.wav](https://freesound.org/people/freemaster2/sounds/117538/) | Soft Craft and Market: light irregular taps / pulse, fixed gain |
-| marimba.mp3 | sgossner / Versilian Studios; performer Justin B. Belanger | [Marimba – B3](https://freesound.org/people/sgossner/sounds/373577/) | Soft Craft and Market: individual notes, playback-rate transposition from MIDI 59, envelope |
-| crowd.mp3 | JackAmadon | [Crowd Ambience.wav](https://freesound.org/people/JackAmadon/sounds/486354/) | Preserved with the licensed source set, but no longer requested or decoded at runtime |
-| bell.mp3 | RP1312 | [2016.07.22 Bell Single 01.wav](https://freesound.org/people/RP1312/sounds/350616/) | Respect: sparse bell notes, envelope; original procedural sine tones provide sustained atmosphere |
-| pluck.mp3 | Skamos66 | [C4.wav](https://freesound.org/people/Skamos66/sounds/399494/) | Culture: single plucked note transposed from MIDI 60 into an original pentatonic sequence |
+Each source page explicitly lists **CC0** (verified 2026-10-12), permitting reuse, modification and redistribution: [CC0 terms](https://creativecommons.org/publicdomain/zero/1.0/). These are generic representative recordings, **not recordings of the mapped Wua-lai places**. The market is identified as Chiang Mai by its uploader; the flute is not claimed to be a Lanna performance.
 
-The downloaded MP3 files are unmodified. At decode time the engine removes leading silence and applies a fixed per-sample peak normalization. Market now uses a continuous procedural tonal texture with marimba and light-metal rhythm instead of crowd sound. Processing listed above happens only during playback. No premade music track is used.
+The unmodified high-quality MP3 previews are served locally. Exact source/player URLs, creator credits and SHA-256 checksums are in public/audio/manifest.json and docs/audio-hashes.json. Runtime processing: remove leading silence, fixed peak normalization, 0.8-second loop seam crossfade and overlapping playback windows at original pitch/speed. The bell retains its complete decay and uses the existing event cadence. Active places, intensity-derived intervals, stereo position, solo, pause, loading cancellation and 0.8-second selection transitions remain in the existing engine.
 
-These are generic sonic materials, **not field recordings made in Wua-lai**. Culture is a folk-inspired generative pentatonic melody, not a claim to reproduce an authentic Lanna performance or instrument. That interpretation follows the workbook's explicit “เครื่องดนตรีล้านนา/folk-inspired melody” alternative.
-
-Freesound's description of each listed sound allows use without attribution; attribution is nevertheless retained here. No rights to the supplied UI or workbook are inferred from these audio licenses.
+Legacy light-metal.mp3, marimba.mp3, crowd.mp3, bell.mp3 and pluck.mp3 remain archived in the manifest with their original CC0 provenance; they are not fetched or played by the current engine.

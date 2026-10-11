@@ -12,6 +12,7 @@ async function instrumentAudio(page: Page) {
     window.AudioContext = class extends Original {
       constructor(options?: AudioContextOptions) { super(options); w.audioProbe.contexts.push(this) }
     }
+    AudioContext.prototype.createOscillator = () => { throw new Error('Activity audio must use recordings, not oscillators') }
     const originalConnect = AudioNode.prototype.connect
     AudioNode.prototype.connect = function(this: AudioNode, destination: AudioNode | AudioParam, ...rest: number[]) {
       if (destination === this.context.destination) {
@@ -32,16 +33,23 @@ async function instrumentAudio(page: Page) {
 }
 
 async function energy(page: Page) {
-  return page.evaluate(() => {
+  return page.evaluate(async () => {
     const probe = (window as unknown as { audioProbe: { analyser?: AnalyserNode } }).audioProbe
     if (!probe.analyser) return 0
     const array = new Float32Array(probe.analyser.fftSize)
-    probe.analyser.getFloatTimeDomainData(array)
-    return Math.sqrt(array.reduce((sum,n) => sum + n*n, 0) / array.length)
+    // Real hammer/bell recordings contain silence between impacts. Observe a
+    // whole second instead of aliasing sparse hits with one instantaneous read.
+    let peakEnergy = 0
+    for (let i = 0; i < 50; i++) {
+      probe.analyser.getFloatTimeDomainData(array)
+      peakEnergy = Math.max(peakEnergy, Math.sqrt(array.reduce((sum,n) => sum + n*n, 0) / array.length))
+      await new Promise(resolve => setTimeout(resolve, 20))
+    }
+    return peakEnergy
   })
 }
 
-test('play gesture starts musical samples, selection persists with crossfade, pauses and stays unique', async ({ page }) => {
+test('play gesture starts real activity recordings, selection persists with crossfade, pauses and stays unique', async ({ page }) => {
   await instrumentAudio(page)
   const requestedAudio: string[] = []
   page.on('request', request => { if (request.url().includes('/audio/')) requestedAudio.push(request.url()) })
@@ -55,7 +63,8 @@ test('play gesture starts musical samples, selection persists with crossfade, pa
   await page.getByRole('button', {name:'Monday',exact:true}).click()
   await page.getByRole('slider', {name:'Time',exact:true}).fill('720')
   await expect.poll(() => energy(page), {timeout:10000}).toBeGreaterThan(0.0001)
-  expect(requestedAudio.some(url => url.endsWith('/crowd.mp3'))).toBe(false)
+  expect(requestedAudio.some(url => url.endsWith('/market.mp3'))).toBe(true)
+  expect(requestedAudio.some(url => url.endsWith('/culture.mp3'))).toBe(true)
   const selected = page.locator('#experience [data-place=P20]').first()
   await selected.hover()
   await expect(page.locator('#experience .map-marker[data-dimmed=true]').first()).toBeVisible()

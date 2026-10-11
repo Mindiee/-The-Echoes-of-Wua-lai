@@ -38,3 +38,7 @@ Map, About, and Method screenshots at the four principal widths are preserved in
 Phone screenshots at 320 and 390 CSS pixels are preserved in `docs/screenshots/mobile/`. They are browser simulations on Windows; no physical iPhone or Android device was available.
 
 The approved data-driven differences from the mockup are the active count, active marker colors (including P15 Workshop and P13 Temple), P14's selected state and the added accessible interaction hit areas.
+
+## Real activity recordings — 2026-10-12
+
+Replaced runtime synthetic textures/generated notes with five CC0 physical recordings. Source licenses, original preview URLs and checksums are in SOUND_SOURCES.md and the audio manifest. Decoded all five assets in Chromium and checked nonzero signal. Build/typecheck and 13 unit tests pass. Chromium audio integration: 3 pass (measured output, solo/selection, 0.8s fades, page state, silence at 24:00, pause/restart, one context, failed-load retry and cancellation). Autoplay and marker checks: 6 pass across Chromium/WebKit; 5 WebKit audio cases skip because this build does not expose Web Audio or uses Chromium-specific autoplay flags. Native Safari/device listening was not performed. Instrumented test rejects oscillator creation. Output detection samples a full second to accommodate natural gaps between hammer/bell hits.

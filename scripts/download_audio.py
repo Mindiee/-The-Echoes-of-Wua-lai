@@ -1,4 +1,4 @@
-"""Download the six individually verified CC0 Freesound preview encodings."""
+"""Download the individually verified CC0 Freesound preview encodings."""
 import hashlib
 import json
 import pathlib
