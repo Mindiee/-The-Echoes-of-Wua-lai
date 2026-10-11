@@ -47,7 +47,7 @@ export function Map({ activeIds, showRoads, selectedId, onSelect, interactive = 
           <path d={marker.geometry.d} fill="none" stroke="transparent" strokeWidth="16" className="hit-target" />
         </> : <>
           {marker.frame && !isCrafthouse && <rect x={marker.x - 4} y={marker.y - 4} width="8" height="8" fill="none" stroke="var(--ink)" strokeWidth=".7" />}
-          {isActive && <circle className="marker-ring" cx={marker.x} cy={marker.y} r="5.5" fill="none" stroke={color} strokeWidth="1.1" style={{ transformOrigin: `${marker.x}px ${marker.y}px` }} />}
+          {isActive && <circle className="marker-ring" cx={marker.x} cy={marker.y} r="5.5" fill="none" stroke={color} strokeWidth="2" style={{ transformOrigin: `${marker.x}px ${marker.y}px` }} />}
           {isCrafthouse
             ? <circle className="marker-visible" cx={marker.x} cy={marker.y} r="4" fill={isActive ? color : 'var(--paper)'} stroke={color} strokeWidth="1" />
             : marker.shape === 'path'
